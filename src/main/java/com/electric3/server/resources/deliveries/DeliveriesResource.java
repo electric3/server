@@ -34,15 +34,15 @@ public class DeliveriesResource {
         return Response.ok(holder.serialize(), MediaType.APPLICATION_JSON).build();
     }
 
-    @POST
-    @Path("{id}/setStatus/")
-    public Response setStatus(@PathParam("id") String projectId, String json) {
+    @GET
+    @Path("{id}/setStatus/{statusId}")
+    public Response setStatus(@PathParam("id") String projectId, @PathParam("statusId") String statusId) {
         return Response.ok().build();
     }
 
-    @POST
-    @Path("{id}/setProgress/")
-    public Response setProgress(@PathParam("id") String projectId, String json) {
+    @GET
+    @Path("{id}/setProgress/{progressValue}")
+    public Response setProgress(@PathParam("id") String projectId, @PathParam("progressValue") String progressValue) {
         return Response.ok().build();
     }
 
