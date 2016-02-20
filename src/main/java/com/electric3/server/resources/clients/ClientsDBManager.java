@@ -5,6 +5,7 @@ import com.electric3.dataatoms.Department;
 import com.electric3.dataatoms.Holder;
 import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.resources.users.UsersDBManager;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -29,12 +30,20 @@ public class ClientsDBManager extends NoSqlBase {
     private ClientsDBManager() {
     }
 
-    public void createClient(Client client) {
+    public void createClient(Client client) throws Exception {
         log.info("createClient");
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_CLIENTS);
         collection.insertOne(Document.parse(client.serialize()));
+
+        Document doc = collection.find(eq("owner.user_id", client.getOwner().getUser_id())).first();
+        if (doc == null) {
+            throw new Exception("no client found for user");
+        }
+        Client createdClient = Client.deserialize(doc.toJson(), Client.class);
+        UsersDBManager usersDBManager = UsersDBManager.getInstance();
+        usersDBManager.setUserClientId(createdClient.getOwner(), convertObjectId(createdClient.get_id()));
     }
 
     public String getClientDepartments(String clientId) {
