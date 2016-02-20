@@ -93,14 +93,10 @@ public class DeliveriesDBManager extends NoSqlBase {
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
         ObjectId objectId = new ObjectId(deliveryId);
-        //comment.setCreatedAt(String.valueOf(System.currentTimeMillis() / 1000));
+        comment.setTimestamp(String.valueOf(System.currentTimeMillis() / 1000));
         collection.updateOne(eq("_id", objectId),
                 new Document("$push",
                         new Document("comments", Document.parse(comment.serialize()))));
-
-        collection.updateOne(eq("_id", objectId),
-                new Document("$set",
-                        new Document("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
 
     public void setAssignee(String deliveryId, User user) {
