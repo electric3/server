@@ -1,8 +1,8 @@
 package com.electric3.server.resources.departments;
 
-import com.electric3.dataatoms.Department;
-import com.electric3.dataatoms.Holder;
+import com.electric3.dataatoms.Project;
 import com.electric3.dataatoms.User;
+import com.electric3.server.utils.StackTraceUtils;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,8 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 @Path("departments")
@@ -21,27 +19,52 @@ public class DepartmentsResource {
     @POST
     @Path("{departmentId}/projects")
     public Response createProject(@PathParam("departmentId") String departmentId, String json) {
-        return Response.ok().build();
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        try {
+            Project project = Project.deserialize(json, Project.class);
+            departmentsDBManager.createProject(departmentId, project);
+            return Response.ok().build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
     }
 
     @GET
     @Path("{departmentId}/projects")
     public Response getProjects(@PathParam("departmentId") String departmentId) {
-        return Response.ok().build();
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        try {
+            return Response.ok(departmentsDBManager.getDepartmentProjects(departmentId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
     }
 
     @GET
     @Path("{departmentId}/users")
     public Response getUsers(@PathParam("departmentId") String departmentId) {
-        List<User> users = new ArrayList<>();
-        Holder<User> usersHolder = new Holder<>();
-        usersHolder.setItems(users);
-        return Response.ok(usersHolder.serialize(), MediaType.APPLICATION_JSON).build();
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        try {
+            return Response.ok(departmentsDBManager.getDepartmentUsers(departmentId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
     }
 
     @POST
     @Path("{departmentId}/users")
     public Response createUser(@PathParam("departmentId") String departmentId, String json) {
-        return Response.ok().build();
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        try {
+            User user = User.deserialize(json, User.class);
+            departmentsDBManager.createUser(departmentId, user);
+            return Response.ok().build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
     }
 }

@@ -20,6 +20,7 @@ public class NoSqlBase {
     protected static final String MONGODB_COLLECTION_NAME_DELIVERIES = "deliveries";
     protected static final String MONGODB_COLLECTION_NAME_CLIENTS = "clients";
     protected static final String MONGODB_COLLECTION_NAME_DEPARTMENTS = "departments";
+    protected static final String MONGODB_COLLECTION_NAME_PROJECTS = "projects";
 
     public enum ConnectionFactory {
         CONNECTION;
