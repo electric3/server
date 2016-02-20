@@ -14,9 +14,8 @@ import java.util.logging.Logger;
 
 public class UsersDBManager extends NoSqlBase {
 
-    private static final String AUTH0_CLIENT_ID = "hoGYsgYO81VhIJVJSDNvb0CnJk6AfyP7";
     private static final String AUTH0_CONNECTION = "Username-Password-Authentication";
-    private static final String AUTH0_USERS_ENDPOINT = "https://haud.eu.auth0.com/api/v2/users";
+    private static final String AUTH0_USERS_ENDPOINT = "https://project-rack.eu.auth0.com/api/v2/users";
     private static final String AUTH0_AUTH_HEADER = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ4MmozSnZMb3Q2NVpScHNxQUFBajZIMXR0NEhYUE9rbyIsInNjb3BlcyI6eyJ1c2VycyI6eyJhY3Rpb25zIjpbInJlYWQiLCJjcmVhdGUiXX19LCJpYXQiOjE0NTU5OTAyOTIsImp0aSI6ImNmYjI1MTk0MzExMzIyMjNmOWI4MTllMTg1ZDEwYjU1In0.aUADSlQKAVAm882bRrS10VEnL6tdOTov2mAZdmfWc0g";
 
 
@@ -69,6 +68,9 @@ public class UsersDBManager extends NoSqlBase {
         HttpSender httpSender = HttpSender.getInstance();
         validateEmailUniqueness(user.getEmail(), httpSender);
 
+        user.setCreated_at(null);
+        user.setModified_at(null);
+        user.setUser_id(null);
         user.setConnection(AUTH0_CONNECTION);
         user.getUser_metadata().setClientId(clientId);
 

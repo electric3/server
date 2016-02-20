@@ -37,7 +37,7 @@ public class HttpSender {
         log.info("Response Code : " + responseCode);
         log.info("Reason : " + response.getStatusLine().getReasonPhrase());
 
-        if (responseCode != 400) {
+        if (responseCode >= 400) {
             throw new Exception("Response code is not success");
         }
 

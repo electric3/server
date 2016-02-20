@@ -48,6 +48,11 @@ public class ClientResourceTest extends JerseyTest {
         Holder<User> users = getUsers(clientId);
         int before = users.getItems().size();
         createUser(clientId);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         int after = getUsers(clientId).getItems().size();
         assertTrue((after - before) == 1);
     }
