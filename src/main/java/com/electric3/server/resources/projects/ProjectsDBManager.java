@@ -1,9 +1,8 @@
 package com.electric3.server.resources.projects;
 
-import com.electric3.dataatoms.Delivery;
-import com.electric3.dataatoms.Holder;
-import com.electric3.dataatoms.User;
+import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.resources.actions.ActionsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
@@ -60,6 +59,19 @@ public class ProjectsDBManager extends NoSqlBase {
         delivery.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
         delivery.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(delivery.serialize()));
+
+        collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(delivery.getProjectId());
+
+        action.setActionStringRepresentation(String.format("A new delivery '%s' has been created in project '%s",
+                delivery.getTitle(), project.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public void setOwner(String projectId, User user) {
@@ -71,5 +83,17 @@ public class ProjectsDBManager extends NoSqlBase {
                 new Document("$set",
                         new Document("owner", Document.parse(user.serialize())).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(projectId);
+
+        action.setActionStringRepresentation(String.format("A new owner '%s' has been set for project '%s",
+                user.getUser_metadata().getName(), project.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 }
