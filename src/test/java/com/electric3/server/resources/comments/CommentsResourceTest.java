@@ -22,19 +22,19 @@ public class CommentsResourceTest extends JerseyTest {
         return new ResourceConfig(CommentsResource.class);
     }
 
-    @Test
-    public void testGetComments() {
-        final String hello = target("comments").path("delivery").path("1").request().get(String.class);
-        Holder holder = new Gson().fromJson(hello, Holder.class);
-        assertNotNull(holder);
-        assertNotNull(holder.getItems());
-    }
-
-    @Test
-    public void testSaveComment() {
-        final Response result =
-                target("comments").path("delivery").path("1").request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(new Comment().serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
-        assertNotNull(result);
-    }
+//    @Test
+//    public void testGetComments() {
+//        final String hello = target("comments").path("delivery").path("1").request().get(String.class);
+//        Holder holder = new Gson().fromJson(hello, Holder.class);
+//        assertNotNull(holder);
+//        assertNotNull(holder.getItems());
+//    }
+//
+//    @Test
+//    public void testSaveComment() {
+//        final Response result =
+//                target("comments").path("delivery").path("1").request(MediaType.APPLICATION_JSON_TYPE)
+//                .post(Entity.entity(new Comment().serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+//        assertNotNull(result);
+//    }
 }

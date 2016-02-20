@@ -29,17 +29,17 @@ public class DeliveriesResourceTest extends JerseyTest {
         return new ResourceConfig(DeliveriesResource.class);
     }
 
-    @Test
-    public void testGetDelivery() {
-        final Delivery result = target("deliveries").path("1").request().get(Delivery.class);
-        assertNotNull( result );
-    }
-
-    @Test
-    public void testGetDeliveryComments() {
-        final String response = target("deliveries").path("1").path("comments").request().get(String.class);
-        Holder holder = new Gson().fromJson(response, Holder.class);
-        assertNotNull(holder);
-        assertNotNull(holder.getItems());
-    }
+//    @Test
+//    public void testGetDelivery() {
+//        final Delivery result = target("deliveries").path("1").request().get(Delivery.class);
+//        assertNotNull( result );
+//    }
+//
+//    @Test
+//    public void testGetDeliveryComments() {
+//        final String response = target("deliveries").path("1").path("comments").request().get(String.class);
+//        Holder holder = new Gson().fromJson(response, Holder.class);
+//        assertNotNull(holder);
+//        assertNotNull(holder.getItems());
+//    }
 }
