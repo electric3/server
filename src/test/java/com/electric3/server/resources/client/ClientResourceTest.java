@@ -2,6 +2,7 @@ package com.electric3.server.resources.client;
 
 import com.electric3.dataatoms.*;
 import com.electric3.server.resources.clients.ClientsResource;
+import com.electric3.server.resources.departments.DepartmentsResource;
 import com.electric3.server.resources.utils.Mock;
 import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -14,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -21,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 public class ClientResourceTest extends JerseyTest {
     @Override
     protected Application configure() {
-        return new ResourceConfig(ClientsResource.class);
+        return new ResourceConfig(ClientsResource.class, DepartmentsResource.class);
     }
 
     @Test
@@ -39,7 +42,7 @@ public class ClientResourceTest extends JerseyTest {
         Mock.ME.setClient(client);
 
         usersScenario(getClientId());
-        departmentsScript();
+        departmentsScript(getClientId());
     }
 
     /******************************************************************************************************************/
@@ -92,14 +95,18 @@ public class ClientResourceTest extends JerseyTest {
     }
     /******************************************************************************************************************/
 
-    public void departmentsScript() {
+    public void departmentsScript(String clientId) {
         Holder<Department> departments = getDepartments();
         int before = departments.getItems().size();
         createNewDepartment();
         int after = getDepartments().getItems().size();
         assertTrue((after - before) == 1);
 
-        projectScript();
+        Holder<Department> forDepP = getDepartments();
+        List<Department> deps = forDepP.getItems();
+        for(Department department : deps ) {
+            projectScript(clientId, (String) department.get_id());
+        }
     }
 
     public void createNewDepartment() {
@@ -128,18 +135,54 @@ public class ClientResourceTest extends JerseyTest {
         return departmentsHolder;
     }
 
+    /******************************************************************************************************************/
 
+    public void projectScript(String clientId, String departmentId) {
+        int before = getProjectsDepartment(departmentId).getItems().size();
+        createProjectForDepartment(clientId, departmentId);
+        int after = getProjectsDepartment(departmentId).getItems().size();
+        assertTrue( (after - before) == 0 );
+    }
 
-    public void createProjectForDepartment() {
+    public Holder<Project> getProjectsDepartment(String departmentId) {
+        String result = target("departments").path(departmentId).path("projects")
+                .request().get(String.class);
+        Holder<Project> departmentsHolder = new Gson().fromJson(result, Holder.class);
+        return departmentsHolder;
+    }
+
+    public void createProjectForDepartment(String clientId, String departmentId) {
+        Project project = new Project();
+        project.setTitle("Project " + getTSS());
+        project.setDescription("Description " + getTSS());
+        project.setDeadline( System.currentTimeMillis() + 60 * 60 * 1000 * 12 );
+        project.setDepartmentId(departmentId);
+
+        Holder<User> users = getUsers(clientId);
+        int size = users.getItems().size();
+        int ownerId = ThreadLocalRandom.current().nextInt(0, size);
+        project.setOwner(users.getItems().get(ownerId));
+
+        Response response = target("departments").path(departmentId).path("projects")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post( Entity.entity(project.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+        assertNotNull(response);
+    }
+
+    /******************************************************************************************************************/
+
+    public void progressScenario() {
 
     }
 
-    public void projectScript() {
-
-    }
-
+    /******************************************************************************************************************/
 
     public String getClientId() {
         return (String) Mock.ME.getClient().get_id();
     }
+
+    public String getTSS() {
+        return new Date(System.currentTimeMillis()).toLocaleString();
+    }
+
 }
