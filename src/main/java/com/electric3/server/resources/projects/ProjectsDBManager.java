@@ -2,11 +2,13 @@ package com.electric3.server.resources.projects;
 
 import com.electric3.dataatoms.Delivery;
 import com.electric3.dataatoms.Holder;
+import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,5 +55,16 @@ public class ProjectsDBManager extends NoSqlBase {
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
         delivery.setProjectId(projectId);
         collection.insertOne(Document.parse(delivery.serialize()));
+    }
+
+    public void setOwner(String projectId, User user) {
+        log.info(String.format("set project %s new owner", projectId));
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
+        collection.updateOne(eq("_id", new ObjectId(projectId)),
+                new Document("$set",
+                        new Document("owner", Document.parse(user.serialize())).
+                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
 }
