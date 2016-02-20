@@ -33,7 +33,7 @@ public class ClientsResource {
 
     @POST
     @Path("{clientId}/departments")
-    public Response createDepartments(@PathParam("clientId") String clientId, String json) {
+    public Response createDepartment(@PathParam("clientId") String clientId, String json) {
         return Response.ok().build();
     }
 }
