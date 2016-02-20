@@ -1,12 +1,14 @@
 package com.electric3.server.resources.client;
 
 import com.electric3.dataatoms.*;
+import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.clients.ClientsResource;
 import com.electric3.server.resources.departments.DepartmentsResource;
 import com.electric3.server.resources.projects.ProjectsResource;
 import com.electric3.server.resources.users.UsersResource;
 import com.electric3.server.resources.utils.Mock;
 import com.google.gson.Gson;
+import com.mongodb.client.MongoDatabase;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
@@ -36,6 +38,11 @@ public class ClientResourceTest extends JerseyTest {
     @Test
     public void testForDirector() {
         ivanScenario();
+    }
+
+    public void clearDB() {
+        MongoDatabase clientDatabase = NoSqlBase.ConnectionFactory.CONNECTION.getClientDatabase();
+        clientDatabase.drop();
     }
 
     public void ivanScenario() {
