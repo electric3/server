@@ -4,6 +4,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -70,5 +71,33 @@ public class HttpSender {
         String responseString = EntityUtils.toString(entity, "UTF-8");
 
         return responseString;
+    }
+
+    public int sendPatch(String url, String authHeaderValue, String data) throws Exception {
+        int responseCode;
+
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPatch patch = new HttpPatch(url);
+
+        // add header
+        patch.setHeader("Authorization", authHeaderValue);
+        patch.setHeader("Content-type", "application/json; charset=UTF-8");
+
+        patch.setEntity(new StringEntity(data, "UTF-8"));
+
+        HttpResponse response = client.execute(patch);
+        responseCode = response.getStatusLine().getStatusCode();
+        log.info("Response Code : " + responseCode);
+        log.info("Reason : " + response.getStatusLine().getReasonPhrase());
+
+        if (responseCode >= 400) {
+            throw new Exception("Response code is not success");
+        }
+
+        HttpEntity entity = response.getEntity();
+        String responseString = EntityUtils.toString(entity, "UTF-8");
+
+        log.info(responseString);
+        return responseCode;
     }
 }
