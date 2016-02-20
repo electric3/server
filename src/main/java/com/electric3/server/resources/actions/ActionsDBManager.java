@@ -3,6 +3,7 @@ package com.electric3.server.resources.actions;
 import com.electric3.dataatoms.Action;
 import com.electric3.dataatoms.Holder;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -35,11 +36,13 @@ public class ActionsDBManager extends NoSqlBase {
         Holder<Action> actionsHolder = new Holder<>();
         List<Action> actions = new ArrayList<>();
 
-        collection.find(eq("clientId", clientId)).forEach((Block<Document>) doc -> {
-            Action action = Action.deserialize(doc.toJson(), Action.class);
-            action.set_id(convertObjectId(action.get_id()));
-            actions.add(action);
-        });
+        collection.find(eq("clientId", clientId))
+                .sort(new Document("timestamp", -1))
+                .forEach((Block<Document>) doc -> {
+                    Action action = Action.deserialize(doc.toJson(), Action.class);
+                    action.set_id(convertObjectId(action.get_id()));
+                    actions.add(action);
+                });
 
         actionsHolder.setItems(actions);
 
@@ -55,11 +58,13 @@ public class ActionsDBManager extends NoSqlBase {
         Holder<Action> actionsHolder = new Holder<>();
         List<Action> actions = new ArrayList<>();
 
-        collection.find(eq("departmentId", departmentId)).forEach((Block<Document>) doc -> {
-            Action action = Action.deserialize(doc.toJson(), Action.class);
-            action.set_id(convertObjectId(action.get_id()));
-            actions.add(action);
-        });
+        collection.find(eq("departmentId", departmentId))
+                .sort(new Document("timestamp", -1))
+                .forEach((Block<Document>) doc -> {
+                    Action action = Action.deserialize(doc.toJson(), Action.class);
+                    action.set_id(convertObjectId(action.get_id()));
+                    actions.add(action);
+                });
 
         actionsHolder.setItems(actions);
 
@@ -75,11 +80,13 @@ public class ActionsDBManager extends NoSqlBase {
         Holder<Action> actionsHolder = new Holder<>();
         List<Action> actions = new ArrayList<>();
 
-        collection.find(eq("departmentId", projectId)).forEach((Block<Document>) doc -> {
-            Action action = Action.deserialize(doc.toJson(), Action.class);
-            action.set_id(convertObjectId(action.get_id()));
-            actions.add(action);
-        });
+        collection.find(eq("departmentId", projectId))
+                .sort(new Document("timestamp", -1))
+                .forEach((Block<Document>) doc -> {
+                    Action action = Action.deserialize(doc.toJson(), Action.class);
+                    action.set_id(convertObjectId(action.get_id()));
+                    actions.add(action);
+                });
 
         actionsHolder.setItems(actions);
 
@@ -91,7 +98,7 @@ public class ActionsDBManager extends NoSqlBase {
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_ACTIONS);
-        action.setTimestamp(String.valueOf(System.currentTimeMillis() / 1000));
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(action.serialize()));
 
     }

@@ -6,6 +6,7 @@ import com.electric3.dataatoms.Holder;
 import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.users.UsersDBManager;
+import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -35,6 +36,8 @@ public class ClientsDBManager extends NoSqlBase {
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_CLIENTS);
+        client.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
+        client.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(client.serialize()));
 
         Document doc = collection.find(eq("owner.user_id", client.getOwner().getUser_id())).first();
@@ -55,11 +58,13 @@ public class ClientsDBManager extends NoSqlBase {
         Holder<Department> departments = new Holder<>();
         List<Department> departmentsList = new ArrayList<>();
 
-        collection.find(eq("clientId", clientId)).forEach((Block<Document>) doc -> {
-            Department department = Department.deserialize(doc.toJson(), Department.class);
-            department.set_id(convertObjectId(department.get_id()));
-            departmentsList.add(department);
-        });
+        collection.find(eq("clientId", clientId))
+                .sort(new Document("modifiedAt", -1))
+                .forEach((Block<Document>) doc -> {
+                    Department department = Department.deserialize(doc.toJson(), Department.class);
+                    department.set_id(convertObjectId(department.get_id()));
+                    departmentsList.add(department);
+                });
 
         departments.setItems(departmentsList);
 
@@ -72,6 +77,8 @@ public class ClientsDBManager extends NoSqlBase {
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
         department.setClientId(clientId);
+        department.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
+        department.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(department.serialize()));
     }
 
@@ -99,6 +106,6 @@ public class ClientsDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", new ObjectId(clientId)),
                 new Document("$set",
                         new Document("owner", Document.parse(user.serialize())).
-                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 }

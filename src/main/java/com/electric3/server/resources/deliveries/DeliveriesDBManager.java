@@ -5,6 +5,7 @@ import com.electric3.dataatoms.Delivery;
 import com.electric3.dataatoms.Holder;
 import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -51,7 +52,7 @@ public class DeliveriesDBManager extends NoSqlBase {
 
         Document doc = collection.aggregate(
                 asList(new Document("$match", new Document("_id", new ObjectId(deliveryId))),
-                        new Document("$unwind", "$comments"), new Document("$sort", new Document("comments.createdAt", -1)),
+                        new Document("$unwind", "$comments"), new Document("$sort", new Document("comments.timestamp", -1)),
                         new Document("$group", new Document("_id", "$_id").append("comments", new Document("$push", "$comments"))))).first();
 
         Holder<Comment> holder = new Holder<>();
@@ -73,7 +74,7 @@ public class DeliveriesDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", new ObjectId(deliveryId)),
                 new Document("$set",
                         new Document("status", statusId).
-                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 
     public void setProgress(String deliveryId, int progressValue) {
@@ -84,7 +85,7 @@ public class DeliveriesDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", new ObjectId(deliveryId)),
                 new Document("$set",
                         new Document("progress", progressValue).
-                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 
     public void addComment(String deliveryId, Comment comment) {
@@ -93,10 +94,14 @@ public class DeliveriesDBManager extends NoSqlBase {
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
         ObjectId objectId = new ObjectId(deliveryId);
-        comment.setTimestamp(String.valueOf(System.currentTimeMillis() / 1000));
+        comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         collection.updateOne(eq("_id", objectId),
                 new Document("$push",
                         new Document("comments", Document.parse(comment.serialize()))));
+
+        collection.updateOne(eq("_id", objectId),
+                new Document("$set",
+                        new Document("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 
     public void setAssignee(String deliveryId, User user) {
@@ -107,6 +112,6 @@ public class DeliveriesDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", new ObjectId(deliveryId)),
                 new Document("$set",
                         new Document("assignee", Document.parse(user.serialize())).
-                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 }

@@ -4,6 +4,7 @@ import com.electric3.dataatoms.Holder;
 import com.electric3.dataatoms.Project;
 import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -34,6 +35,8 @@ public class DepartmentsDBManager extends NoSqlBase {
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
         project.setDepartmentId(departmentId);
+        project.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
+        project.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(project.serialize()));
     }
 
@@ -46,11 +49,13 @@ public class DepartmentsDBManager extends NoSqlBase {
         Holder<Project> projects = new Holder<>();
         List<Project> projectsList = new ArrayList<>();
 
-        collection.find(eq("departmentId", departmentId)).forEach((Block<Document>) doc -> {
-            Project project = Project.deserialize(doc.toJson(), Project.class);
-            project.set_id(convertObjectId(project.get_id()));
-            projectsList.add(project);
-        });
+        collection.find(eq("departmentId", departmentId))
+                .sort(new Document("modifiedAt", -1))
+                .forEach((Block<Document>) doc -> {
+                    Project project = Project.deserialize(doc.toJson(), Project.class);
+                    project.set_id(convertObjectId(project.get_id()));
+                    projectsList.add(project);
+                });
 
         projects.setItems(projectsList);
 

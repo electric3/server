@@ -4,6 +4,7 @@ import com.electric3.dataatoms.Delivery;
 import com.electric3.dataatoms.Holder;
 import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -37,11 +38,13 @@ public class ProjectsDBManager extends NoSqlBase {
         Holder<Delivery> deliveriesHolder = new Holder<>();
         List<Delivery> deliveries = new ArrayList<>();
 
-        collection.find(eq("projectId", projectId)).forEach((Block<Document>) doc -> {
-            Delivery delivery = Delivery.deserialize(doc.toJson(), Delivery.class);
-            delivery.set_id(convertObjectId(delivery.get_id()));
-            deliveries.add(delivery);
-        });
+        collection.find(eq("projectId", projectId))
+                .sort(new Document("modifiedAt", -1))
+                .forEach((Block<Document>) doc -> {
+                    Delivery delivery = Delivery.deserialize(doc.toJson(), Delivery.class);
+                    delivery.set_id(convertObjectId(delivery.get_id()));
+                    deliveries.add(delivery);
+                });
 
         deliveriesHolder.setItems(deliveries);
 
@@ -54,6 +57,8 @@ public class ProjectsDBManager extends NoSqlBase {
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
         delivery.setProjectId(projectId);
+        delivery.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
+        delivery.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(delivery.serialize()));
     }
 
@@ -65,6 +70,6 @@ public class ProjectsDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", new ObjectId(projectId)),
                 new Document("$set",
                         new Document("owner", Document.parse(user.serialize())).
-                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 }
