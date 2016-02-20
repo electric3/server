@@ -30,6 +30,21 @@ public class UsersDBManager extends NoSqlBase {
     private UsersDBManager() {
     }
 
+    public String getUsers() throws Exception {
+        log.info("get all users");
+        Holder<User> holder = new Holder<>();
+
+        HttpSender httpSender = HttpSender.getInstance();
+        String responseString = httpSender.sendGet(AUTH0_USERS_ENDPOINT, AUTH0_AUTH_HEADER);
+
+        ArrayList<User> users = new Gson().fromJson(responseString, new TypeToken<List<User>>() {
+        }.getType());
+
+        holder.setItems(users);
+
+        return holder.serialize();
+    }
+
     public String getClientUsers(String clientId) throws Exception {
         log.info("get all users for: " + clientId);
         Holder<User> holder = new Holder<>();
