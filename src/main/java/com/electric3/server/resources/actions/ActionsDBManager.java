@@ -85,4 +85,14 @@ public class ActionsDBManager extends NoSqlBase {
 
         return actionsHolder.serialize();
     }
+
+    public void createAction(Action action) {
+        log.info("create action");
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_ACTIONS);
+        action.setTimestamp(String.valueOf(System.currentTimeMillis() / 1000));
+        collection.insertOne(Document.parse(action.serialize()));
+
+    }
 }
