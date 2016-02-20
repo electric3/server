@@ -30,7 +30,7 @@ public class DeliveriesResource {
     }
 
     @GET
-    @Path("/{id}/comments/")
+    @Path("{id}/comments")
     public Response getDeliveryComments(@PathParam("id") String deliveryId) {
         log.info("get delivery comments");
         DeliveriesDBManager deliveriesDBManager = DeliveriesDBManager.getInstance();
