@@ -40,9 +40,8 @@ public class ClientResourceTest extends JerseyTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Holder<User> users = getUsers();
-        int ownerId = ThreadLocalRandom.current().nextInt(0, users.getItems().size());
-        User testingUser = users.getItems().get(ownerId);
+
+        User testingUser = getRandomUser();
         createClient(testingUser);
         try {
             Thread.sleep(3000);
@@ -158,7 +157,7 @@ public class ClientResourceTest extends JerseyTest {
     public void departmentsScript(String clientId) {
         Holder<Department> departments = getDepartments();
         int before = departments.getItems().size();
-        createNewDepartment();
+        createNewDepartment(getRandomUser());
         int after = getDepartments().getItems().size();
         assertTrue((after - before) == 1);
 
@@ -169,10 +168,10 @@ public class ClientResourceTest extends JerseyTest {
         }
     }
 
-    public void createNewDepartment() {
+    public void createNewDepartment(User owner) {
         Department newDep = new Department();
         newDep.setDescription("this is description " + new Date(System.currentTimeMillis()).toLocaleString());
-        newDep.setOwner(Mock.getUserManager());
+        newDep.setOwner(owner);
         newDep.setClientId((String) Mock.ME.getClient().get_id());
         newDep.setTitle("this is title " + new Date(System.currentTimeMillis()).toLocaleString());
 
@@ -244,6 +243,12 @@ public class ClientResourceTest extends JerseyTest {
 
     public String getTSS() {
         return new Date(System.currentTimeMillis()).toLocaleString();
+    }
+
+    public User getRandomUser() {
+        Holder<User> users = getUsers();
+        int ownerId = ThreadLocalRandom.current().nextInt(0, users.getItems().size());
+        return users.getItems().get(ownerId);
     }
 
 }
