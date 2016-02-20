@@ -318,6 +318,10 @@ public class ClientResourceTest extends JerseyTest {
         delivery.setAssignee( randomUser );
         delivery.setProgress( randomProgress() );
         delivery.setStatus( randomStatus() );
+        Response response = target("projects").path(projectId).path("deliveries")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+        assertNotNull(response);
     }
 
     /******************************************************************************************************************/
@@ -349,7 +353,7 @@ public class ClientResourceTest extends JerseyTest {
         comment.setTimestamp( String.valueOf(System.currentTimeMillis()) );
         Response response = target("deliveries").path(deliveryId).path("comment")
         .request(MediaType.APPLICATION_JSON_TYPE)
-        .post(Entity.entity(comment, MediaType.APPLICATION_JSON_TYPE), Response.class );
+        .post(Entity.entity(comment.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class );
     }
 
     /******************************************************************************************************************/
