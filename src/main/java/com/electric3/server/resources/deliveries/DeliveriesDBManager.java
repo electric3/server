@@ -1,10 +1,8 @@
 package com.electric3.server.resources.deliveries;
 
-import com.electric3.dataatoms.Comment;
-import com.electric3.dataatoms.Delivery;
-import com.electric3.dataatoms.Holder;
-import com.electric3.dataatoms.User;
+import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.resources.actions.ActionsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -66,15 +64,30 @@ public class DeliveriesDBManager extends NoSqlBase {
         return holder.serialize();
     }
 
+    private Delivery getDeliveryById(String deliveryId, MongoCollection<Document> collection) {
+        Document document = collection.find(eq("_id", new ObjectId(deliveryId))).first();
+        return Delivery.deserialize(document.toJson(), Delivery.class);
+    }
+
     public void setStatus(String deliveryId, int statusId) {
         log.info(String.format("setStatus %d for %s", statusId, deliveryId));
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
-        collection.updateOne(eq("_id", new ObjectId(deliveryId)),
+        ObjectId objectId = new ObjectId(deliveryId);
+        collection.updateOne(eq("_id", objectId),
                 new Document("$set",
                         new Document("status", statusId).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Delivery delivery = getDeliveryById(deliveryId, collection);
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(delivery.getProjectId());
+        action.setActionStringRepresentation(String.format("Delivery '%s' status has been changed to %s",
+                delivery.getTitle(), StatusEnum.values()[statusId]));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public void setProgress(String deliveryId, int progressValue) {
@@ -86,6 +99,15 @@ public class DeliveriesDBManager extends NoSqlBase {
                 new Document("$set",
                         new Document("progress", progressValue).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Delivery delivery = getDeliveryById(deliveryId, collection);
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(delivery.getProjectId());
+        action.setActionStringRepresentation(String.format("Delivery '%s' progress has been changed to %s",
+                delivery.getTitle(), progressValue));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public void addComment(String deliveryId, Comment comment) {
@@ -102,6 +124,15 @@ public class DeliveriesDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", objectId),
                 new Document("$set",
                         new Document("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Delivery delivery = getDeliveryById(deliveryId, collection);
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(delivery.getProjectId());
+        action.setActionStringRepresentation(String.format("Delivery '%s' has a new comment",
+                delivery.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public void setAssignee(String deliveryId, User user) {
@@ -113,5 +144,14 @@ public class DeliveriesDBManager extends NoSqlBase {
                 new Document("$set",
                         new Document("assignee", Document.parse(user.serialize())).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Delivery delivery = getDeliveryById(deliveryId, collection);
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setProjectId(delivery.getProjectId());
+        action.setActionStringRepresentation(String.format("Delivery '%s' has a new assignee",
+                delivery.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 }
