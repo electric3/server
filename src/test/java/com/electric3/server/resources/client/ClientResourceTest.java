@@ -38,6 +38,7 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
+        clearDB();
         ivanScenario();
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
     }
@@ -169,7 +170,7 @@ public class ClientResourceTest extends JerseyTest {
             e.printStackTrace();
         }
         int after = getUsers(clientId).getItems().size();
-        assertTrue((after - before) == 1);
+        assertTrue((after - before) > 0);
     }
 
 
@@ -211,11 +212,11 @@ public class ClientResourceTest extends JerseyTest {
 
     public void departmentsScript(String clientId) {
         Holder<Department> departments = getDepartments();
+        Holder<User> users = getUsers(clientId);
         if( departments.getItems().size() < 3 ) {
-            int before = departments.getItems().size();
-            createNewDepartment(getRandomUser());
-            int after = getDepartments().getItems().size();
-            assertTrue((after - before) == 1);
+            for( int i = 0; i < 3; i++ ) {
+                createNewDepartment(getRandomUser(users));
+            }
         }
 
         Holder<Department> forDepP = getDepartments();
@@ -259,10 +260,8 @@ public class ClientResourceTest extends JerseyTest {
     public void departmentScenario(String clientId, String departmentId) {
         int before = getProjectsDepartment(departmentId).getItems().size();
         if( before < 6 ) {
-            for( int i = 0; i < 7; i++ ) {
+            for( int i = 0; i < 6; i++ ) {
                 createProjectForDepartment(clientId, departmentId);
-                int after = getProjectsDepartment(departmentId).getItems().size();
-                assertTrue((after - before) == 1);
             }
         }
 
@@ -308,7 +307,7 @@ public class ClientResourceTest extends JerseyTest {
         int before = deliveries.getItems().size();
 
         if( before < 6 ) {
-            for( int i = 0; i < 7; i++ ) {
+            for( int i = 0; i < 6; i++ ) {
                 createDelivery(projectId, clientId);
             }
         }
