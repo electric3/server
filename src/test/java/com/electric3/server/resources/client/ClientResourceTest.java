@@ -3,6 +3,7 @@ package com.electric3.server.resources.client;
 import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.clients.ClientsResource;
+import com.electric3.server.resources.deliveries.DeliveriesResource;
 import com.electric3.server.resources.departments.DepartmentsResource;
 import com.electric3.server.resources.projects.ProjectsResource;
 import com.electric3.server.resources.users.UsersResource;
@@ -32,12 +33,13 @@ import static org.junit.Assert.assertTrue;
 public class ClientResourceTest extends JerseyTest {
     @Override
     protected Application configure() {
-        return new ResourceConfig(ClientsResource.class, DepartmentsResource.class, UsersResource.class, ProjectsResource.class);
+        return new ResourceConfig(ClientsResource.class, DepartmentsResource.class, UsersResource.class, ProjectsResource.class, DeliveriesResource.class);
     }
 
     @Test
     public void testForDirector() {
         ivanScenario();
+        //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
     }
 
     public void clearDB() {
@@ -155,6 +157,11 @@ public class ClientResourceTest extends JerseyTest {
     public void usersScenario(String clientId) {
         Holder<User> users = getUsers(clientId);
         int before = users.getItems().size();
+        if( before < 5 ) {
+            for( int i = 0; i < 6; i++ ) {
+                createUser(clientId);
+            }
+        }
         createUser(clientId);
         try {
             Thread.sleep(3000);
@@ -251,10 +258,12 @@ public class ClientResourceTest extends JerseyTest {
 
     public void departmentScenario(String clientId, String departmentId) {
         int before = getProjectsDepartment(departmentId).getItems().size();
-        if( before < 3 ) {
-            createProjectForDepartment(clientId, departmentId);
-            int after = getProjectsDepartment(departmentId).getItems().size();
-            assertTrue((after - before) == 1);
+        if( before < 6 ) {
+            for( int i = 0; i < 7; i++ ) {
+                createProjectForDepartment(clientId, departmentId);
+                int after = getProjectsDepartment(departmentId).getItems().size();
+                assertTrue((after - before) == 1);
+            }
         }
 
         List<Project> items = getProjectsDepartment(departmentId).getItems();
@@ -299,14 +308,14 @@ public class ClientResourceTest extends JerseyTest {
         int before = deliveries.getItems().size();
 
         if( before < 6 ) {
-            createDelivery(projectId, clientId);
+            for( int i = 0; i < 7; i++ ) {
+                createDelivery(projectId, clientId);
+            }
         }
 
         deliveries = getDeliveries(projectId);
-        System.out.println("there are " + deliveries.getItems().size() + " deliveries");
         List<Delivery> items = deliveries.getItems();
         for( Delivery delivery : items ) {
-            System.out.println("now will be adding of comment ");
             deliveryScenario((String)delivery.get_id(), clientId);
         }
     }
