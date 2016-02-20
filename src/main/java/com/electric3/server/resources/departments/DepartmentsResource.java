@@ -19,6 +19,7 @@ public class DepartmentsResource {
     @POST
     @Path("{departmentId}/projects")
     public Response createProject(@PathParam("departmentId") String departmentId, String json) {
+        log.info("create department project");
         DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
         try {
             Project project = Project.deserialize(json, Project.class);
@@ -33,35 +34,10 @@ public class DepartmentsResource {
     @GET
     @Path("{departmentId}/projects")
     public Response getProjects(@PathParam("departmentId") String departmentId) {
+        log.info("get department projects");
         DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
         try {
             return Response.ok(departmentsDBManager.getDepartmentProjects(departmentId), MediaType.APPLICATION_JSON).build();
-        } catch (Exception e) {
-            log.severe(StackTraceUtils.getStackTrace(e));
-            return Response.serverError().build();
-        }
-    }
-
-    @GET
-    @Path("{departmentId}/users")
-    public Response getUsers(@PathParam("departmentId") String departmentId) {
-        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
-        try {
-            return Response.ok(departmentsDBManager.getDepartmentUsers(departmentId), MediaType.APPLICATION_JSON).build();
-        } catch (Exception e) {
-            log.severe(StackTraceUtils.getStackTrace(e));
-            return Response.serverError().build();
-        }
-    }
-
-    @POST
-    @Path("{departmentId}/users")
-    public Response createUser(@PathParam("departmentId") String departmentId, String json) {
-        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
-        try {
-            User user = User.deserialize(json, User.class);
-            departmentsDBManager.createUser(departmentId, user);
-            return Response.ok().build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));
             return Response.serverError().build();
