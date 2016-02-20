@@ -63,4 +63,20 @@ public class ClientsDBManager extends NoSqlBase {
         department.setClientId(clientId);
         collection.insertOne(Document.parse(department.serialize()));
     }
+
+    public String getClientByOwner(String userId) throws Exception {
+        log.info("getClientByOwner " + userId);
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_CLIENTS);
+
+        Document doc = collection.find(eq("owner.user_id", userId)).first();
+        if (doc == null) {
+            throw new Exception("No client with such owner");
+        }
+
+        Client client = Client.deserialize(doc.toJson(), Client.class);
+        client.set_id(convertObjectId(client.get_id()));
+        return client.serialize();
+    }
 }

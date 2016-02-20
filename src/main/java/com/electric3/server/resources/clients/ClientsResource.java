@@ -41,6 +41,18 @@ public class ClientsResource {
         }
     }
 
+    @GET
+    @Path("/info/{userId}")
+    public Response getClientByOwner(@PathParam("userId") String userId) {
+        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        try {
+            return Response.ok(clientsDBManager.getClientByOwner(userId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
     @POST
     @Path("{clientId}/departments")
     public Response createDepartment(@PathParam("clientId") String clientId, String json) {
