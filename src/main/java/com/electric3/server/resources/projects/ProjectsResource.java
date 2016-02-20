@@ -19,6 +19,7 @@ public class ProjectsResource {
     @GET
     @Path("{projectId}/deliveries")
     public Response getDeliveries(@PathParam("projectId") String projectId) {
+        log.info("get project deliveries");
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
         try {
             return Response.ok(projectsDBManager.getProjectDeliveries(projectId), MediaType.APPLICATION_JSON).build();
@@ -31,6 +32,7 @@ public class ProjectsResource {
     @POST
     @Path("{projectId}/deliveries")
     public Response createDelivery(@PathParam("projectId") String projectId, String json) {
+        log.info("create project delivery");
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
         try {
             Delivery delivery = Delivery.deserialize(json, Delivery.class);
@@ -45,6 +47,7 @@ public class ProjectsResource {
     @POST
     @Path("{projectId}/owner")
     public Response setOwner(@PathParam("projectId") String projectId, String json) {
+        log.info("set project owner");
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
         try {
             User user = User.deserialize(json, User.class);
