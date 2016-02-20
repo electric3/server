@@ -3,6 +3,7 @@ package com.electric3.server.resources.clients;
 import com.electric3.dataatoms.Client;
 import com.electric3.dataatoms.Department;
 import com.electric3.dataatoms.User;
+import com.electric3.server.resources.users.UsersDBManager;
 import com.electric3.server.utils.StackTraceUtils;
 
 import javax.ws.rs.GET;
@@ -91,9 +92,9 @@ public class ClientsResource {
     @Path("{clientId}/users")
     public Response getUsers(@PathParam("clientId") String clientId) {
         log.info("get client users");
-        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        UsersDBManager usersDBManager = UsersDBManager.getInstance();
         try {
-            return Response.ok(clientsDBManager.getClientUsers(clientId), MediaType.APPLICATION_JSON).build();
+            return Response.ok(usersDBManager.getClientUsers(clientId), MediaType.APPLICATION_JSON).build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));
             return Response.serverError().build();
@@ -104,10 +105,10 @@ public class ClientsResource {
     @Path("{clientId}/users")
     public Response createUser(@PathParam("clientId") String clientId, String json) {
         log.info("create client user");
-        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        UsersDBManager usersDBManager = UsersDBManager.getInstance();
         try {
             User user = User.deserialize(json, User.class);
-            clientsDBManager.createClientUser(clientId, user);
+            usersDBManager.createClientUser(clientId, user);
             return Response.ok().build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));
