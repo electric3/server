@@ -61,6 +61,11 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.electric3</groupId>
+            <artifactId>dataatoms</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <properties>
         <jersey.version>2.22.1</jersey.version>
