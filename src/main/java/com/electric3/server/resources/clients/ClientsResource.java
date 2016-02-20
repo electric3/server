@@ -86,4 +86,32 @@ public class ClientsResource {
             return Response.serverError().build();
         }
     }
+
+    @GET
+    @Path("{clientId}/users")
+    public Response getUsers(@PathParam("clientId") String clientId) {
+        log.info("get client users");
+        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        try {
+            return Response.ok(clientsDBManager.getClientUsers(clientId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
+    @POST
+    @Path("{clientId}/users")
+    public Response createUser(@PathParam("clientId") String clientId, String json) {
+        log.info("create client user");
+        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        try {
+            User user = User.deserialize(json, User.class);
+            clientsDBManager.createClientUser(clientId, user);
+            return Response.ok().build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
 }

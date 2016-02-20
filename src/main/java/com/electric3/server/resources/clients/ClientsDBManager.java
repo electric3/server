@@ -92,4 +92,12 @@ public class ClientsDBManager extends NoSqlBase {
                         new Document("owner", Document.parse(user.serialize())).
                                 append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
+
+    public String getClientUsers(String clientId) {
+        return null;
+    }
+
+    public void createClientUser(String clientId, User user) {
+
+    }
 }
