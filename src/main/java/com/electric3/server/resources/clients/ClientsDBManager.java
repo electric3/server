@@ -1,10 +1,8 @@
 package com.electric3.server.resources.clients;
 
-import com.electric3.dataatoms.Client;
-import com.electric3.dataatoms.Department;
-import com.electric3.dataatoms.Holder;
-import com.electric3.dataatoms.User;
+import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.resources.actions.ActionsDBManager;
 import com.electric3.server.resources.users.UsersDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
@@ -80,6 +78,19 @@ public class ClientsDBManager extends NoSqlBase {
         department.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
         department.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(department.serialize()));
+
+        collection = database.getCollection(MONGODB_COLLECTION_NAME_CLIENTS);
+        Document clientDoc = collection.find(eq("_id", new ObjectId(clientId))).first();
+        Client client = Client.deserialize(clientDoc.toJson(), Client.class);
+
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setClientId(clientId);
+
+        action.setActionStringRepresentation(String.format("A new department '%s' has been created for client '%s",
+                department.getTitle(), client.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public String getClientByOwner(String userId) throws Exception {
@@ -107,5 +118,17 @@ public class ClientsDBManager extends NoSqlBase {
                 new Document("$set",
                         new Document("owner", Document.parse(user.serialize())).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document clientDoc = collection.find(eq("_id", new ObjectId(clientId))).first();
+        Client client = Client.deserialize(clientDoc.toJson(), Client.class);
+
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setClientId(clientId);
+
+        action.setActionStringRepresentation(String.format("A new owner '%s' has been set for client '%s",
+                user.getUser_metadata().getName(), client.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 }
