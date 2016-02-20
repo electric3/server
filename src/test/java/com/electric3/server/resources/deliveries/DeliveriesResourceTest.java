@@ -29,30 +29,6 @@ public class DeliveriesResourceTest extends JerseyTest {
         return new ResourceConfig(DeliveriesResource.class);
     }
 
-//    @POST
-//    @Path("{id}/setStatus/")
-//    public Response setStatus(@PathParam("id") String projectId, String json) {
-//        return Response.ok().build();
-//    }
-//
-//    @POST
-//    @Path("{id}/setProgress/")
-//    public Response setProgress(@PathParam("id") String projectId, String json) {
-//        return Response.ok().build();
-//    }
-//
-//    @POST
-//    @Path("{id}/comment/")
-//    public Response addComment(@PathParam("id") String projectId, String json) {
-//        return Response.ok().build();
-//    }
-//
-//    @POST
-//    @Path("{id}/attachment/")
-//    public Response addAttachment(@PathParam("id") String projectId, String json) {
-//        return Response.ok().build();
-//    }
-
     @Test
     public void testGetDelivery() {
         final Delivery result = target("deliveries").path("1").request().get(Delivery.class);
