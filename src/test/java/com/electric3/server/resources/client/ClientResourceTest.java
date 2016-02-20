@@ -45,7 +45,7 @@ public class ClientResourceTest extends JerseyTest {
     /******************************************************************************************************************/
 
     public void usersScenario(String clientId) {
-        UsersHolder users = getUsers(clientId);
+        Holder<User> users = getUsers(clientId);
         int before = users.getItems().size();
         createUser(clientId);
         int after = getUsers(clientId).getItems().size();
@@ -75,20 +75,20 @@ public class ClientResourceTest extends JerseyTest {
         assertNotNull(user_resp);
     }
 
-    public UsersHolder getUsers(String clientId) {
+    public Holder<User> getUsers(String clientId) {
         String users_str =
                 target("clients")
                         .path(clientId).path("/users")
                         .request()
                         .get(String.class);
 
-        UsersHolder usersHolder = UsersHolder.deserialize(users_str, UsersHolder.class);
+        Holder<User> usersHolder = new Gson().fromJson(users_str, Holder.class);
         return usersHolder;
     }
     /******************************************************************************************************************/
 
     public void departmentsScript() {
-        DepartmentsHolder departments = getDepartments();
+        Holder<Department> departments = getDepartments();
         int before = departments.getItems().size();
         createNewDepartment();
         int after = getDepartments().getItems().size();
@@ -111,13 +111,16 @@ public class ClientResourceTest extends JerseyTest {
         assertNotNull(newDepartmentResponse);
     }
 
-    public DepartmentsHolder getDepartments() {
+    public Holder<Department> getDepartments() {
         String deps_str =
                 target("clients")
                         .path((String) Mock.ME.getClient().get_id()).path("/departments")
                         .request().get(String.class);
         System.out.println(deps_str);
-        return new Gson().fromJson(deps_str, DepartmentsHolder.class);
+
+        Holder<Department> departmentsHolder = new Gson().fromJson(deps_str, Holder.class);
+
+        return departmentsHolder;
     }
 
 
