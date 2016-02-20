@@ -1,14 +1,14 @@
 package com.electric3.server.resources.departments;
 
-import com.electric3.dataatoms.Holder;
-import com.electric3.dataatoms.Project;
-import com.electric3.dataatoms.User;
+import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
+import com.electric3.server.resources.actions.ActionsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,19 @@ public class DepartmentsDBManager extends NoSqlBase {
         project.setCreatedAt(UtilityMethods.getCurrentTimestampAsString());
         project.setModifiedAt(UtilityMethods.getCurrentTimestampAsString());
         collection.insertOne(Document.parse(project.serialize()));
+
+        collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
+        Document departmentDoc = collection.find(eq("_id", new ObjectId(departmentId))).first();
+        Department department = Project.deserialize(departmentDoc.toJson(), Department.class);
+
+        Action action = new Action();
+        action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        action.setDepartmentId(departmentId);
+
+        action.setActionStringRepresentation(String.format("A new project '%s' has been created in department '%s",
+                project.getTitle(), department.getTitle()));
+        ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
+        actionsDBManager.createAction(action);
     }
 
     public String getDepartmentProjects(String departmentId) {
