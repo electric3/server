@@ -18,6 +18,8 @@ public class NoSqlBase {
     private static final String DBNAME = "projectrack";
 
     protected static final String MONGODB_COLLECTION_NAME_DELIVERIES = "deliveries";
+    protected static final String MONGODB_COLLECTION_NAME_CLIENTS = "clients";
+    protected static final String MONGODB_COLLECTION_NAME_DEPARTMENTS = "departments";
 
     public enum ConnectionFactory {
         CONNECTION;
