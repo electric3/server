@@ -1,6 +1,5 @@
 package com.electric3.server.resources.comments;
 
-import com.electric3.dataatoms.Action;
 import com.electric3.dataatoms.Comment;
 import com.electric3.dataatoms.Holder;
 
@@ -20,7 +19,7 @@ public class CommentsResource {
 
     @GET
     @Path("/delivery/{id}")
-    public Response getDeliveryComments(@PathParam("{id}") String deliveryId) {
+    public Response getDeliveryComments(@PathParam("id") String deliveryId) {
         List<Comment> list = new ArrayList<>();
         Holder<Comment> holder = new Holder<>();
         holder.setItems(list);
@@ -29,7 +28,7 @@ public class CommentsResource {
 
     @POST
     @Path("/delivery/{id}")
-    public Response addDeliveryComment(@PathParam("{id}") String deliveryId, String json) {
+    public Response addDeliveryComment(@PathParam("id") String deliveryId, String json) {
         return Response.ok().build();
     }
 }
