@@ -1,6 +1,7 @@
 package com.electric3.server.resources.deliveries;
 
 import com.electric3.dataatoms.Comment;
+import com.electric3.dataatoms.User;
 import com.electric3.server.utils.StackTraceUtils;
 
 import javax.ws.rs.GET;
@@ -58,6 +59,20 @@ public class DeliveriesResource {
         DeliveriesDBManager deliveriesDBManager = DeliveriesDBManager.getInstance();
         try {
             deliveriesDBManager.setProgress(deliveryId, Integer.parseInt(progressValue));
+            return Response.ok().build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
+    @POST
+    @Path("{deliveryId}/assignee")
+    public Response setOwner(@PathParam("deliveryId") String deliveryId, String json) {
+        DeliveriesDBManager deliveriesDBManager = DeliveriesDBManager.getInstance();
+        try {
+            User user = User.deserialize(json, User.class);
+            deliveriesDBManager.setOwner(deliveryId, user);
             return Response.ok().build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));

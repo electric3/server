@@ -3,6 +3,7 @@ package com.electric3.server.resources.deliveries;
 import com.electric3.dataatoms.Comment;
 import com.electric3.dataatoms.Delivery;
 import com.electric3.dataatoms.Holder;
+import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -100,5 +101,16 @@ public class DeliveriesDBManager extends NoSqlBase {
         collection.updateOne(eq("_id", objectId),
                 new Document("$set",
                         new Document("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
+    }
+
+    public void setOwner(String deliveryId, User user) {
+        log.info(String.format("set delivery %s new assignee", deliveryId));
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
+        collection.updateOne(eq("_id", new ObjectId(deliveryId)),
+                new Document("$set",
+                        new Document("assignee", Document.parse(user.serialize())).
+                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
 }

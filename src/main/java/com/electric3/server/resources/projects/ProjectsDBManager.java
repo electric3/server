@@ -61,7 +61,7 @@ public class ProjectsDBManager extends NoSqlBase {
         log.info(String.format("set project %s new owner", projectId));
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
-        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
         collection.updateOne(eq("_id", new ObjectId(projectId)),
                 new Document("$set",
                         new Document("owner", Document.parse(user.serialize())).
