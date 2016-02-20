@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import java.util.Date;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ClientResourceTest extends JerseyTest {
     @Override
@@ -26,12 +27,15 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
-//        final Response response =
-//        target("clients")
-//
-//        .request(MediaType.APPLICATION_JSON_TYPE)
-//
-//        .post(Entity.entity(newClient.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+        final String client_response_str =
+        target("clients")
+        .path("info")
+        .path(Mock.getUserDirector().getUser_id())
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .get(String.class);
+        assertNotNull( client_response_str );
+        System.out.println(" " + client_response_str );
+        Client client = Client.deserialize(client_response_str, Client.class);
 
     }
 
