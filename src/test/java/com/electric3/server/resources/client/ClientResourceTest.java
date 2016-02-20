@@ -201,13 +201,14 @@ public class ClientResourceTest extends JerseyTest {
         int before = getProjectsDepartment(departmentId).getItems().size();
         createProjectForDepartment(clientId, departmentId);
         int after = getProjectsDepartment(departmentId).getItems().size();
-        assertTrue((after - before) == 0);
+        assertTrue((after - before) == 1);
     }
 
     public Holder<Project> getProjectsDepartment(String departmentId) {
         String result = target("departments").path(departmentId).path("projects")
                 .request().get(String.class);
-        Holder<Project> departmentsHolder = new Gson().fromJson(result, Holder.class);
+        Type fooType = new TypeToken<Holder<Project>>() {}.getType();
+        Holder<Project> departmentsHolder = new Gson().fromJson(result, fooType);
         return departmentsHolder;
     }
 
@@ -215,7 +216,7 @@ public class ClientResourceTest extends JerseyTest {
         Project project = new Project();
         project.setTitle("Project " + getTSS());
         project.setDescription("Description " + getTSS());
-        project.setDeadline(System.currentTimeMillis() + 60 * 60 * 1000 * 12);
+        project.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 1000 * 12));
         project.setDepartmentId(departmentId);
 
         Holder<User> users = getUsers(clientId);
