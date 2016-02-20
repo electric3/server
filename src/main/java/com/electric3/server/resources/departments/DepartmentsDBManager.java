@@ -56,12 +56,4 @@ public class DepartmentsDBManager extends NoSqlBase {
 
         return projects.serialize();
     }
-
-    public String getDepartmentUsers(String departmentId) {
-        return null;
-    }
-
-    public void createUser(String departmentId, User user) {
-
-    }
 }
