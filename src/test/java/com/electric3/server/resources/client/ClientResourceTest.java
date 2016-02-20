@@ -9,6 +9,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.reflect.TypeToken;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -64,12 +68,12 @@ public class ClientResourceTest extends JerseyTest {
     public void createUser(String clientId) {
         User user = new User();
         User.UserMetadata userMetadata = user.new UserMetadata();
-        userMetadata.setName("F: " + new Date(System.currentTimeMillis()).toLocaleString() );
+        userMetadata.setName("F: " + new Date(System.currentTimeMillis()).toLocaleString());
         userMetadata.setSkypeName("skype");
         userMetadata.setPhotoUrl("https://pbs.twimg.com/profile_images/679653172244262912/q8D6AbS4.jpg");
         userMetadata.setClientId(clientId);
         userMetadata.setPhone("+" + System.currentTimeMillis());
-        userMetadata.setRole( UserRole.EMPLOYEE );
+        userMetadata.setRole(UserRole.EMPLOYEE);
         user.setUser_metadata(userMetadata);
         user.setPassword("xyi");
         user.setEmail(System.currentTimeMillis() + "@" + System.currentTimeMillis() + ".com");
@@ -78,7 +82,7 @@ public class ClientResourceTest extends JerseyTest {
                 target("clients")
                         .path(clientId).path("/users")
                         .request(MediaType.APPLICATION_JSON_TYPE)
-                        .post(Entity.entity(user.serialize(),MediaType.APPLICATION_JSON_TYPE), Response.class);
+                        .post(Entity.entity(user.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
 
         assertNotNull(user_resp);
     }
@@ -90,9 +94,11 @@ public class ClientResourceTest extends JerseyTest {
                         .request()
                         .get(String.class);
 
-        Holder<User> usersHolder = new Gson().fromJson(users_str, Holder.class);
+        Type fooType = new TypeToken<Holder<User>>() {}.getType();
+        Holder<User> usersHolder = new Gson().fromJson(users_str, fooType);
         return usersHolder;
     }
+
     /******************************************************************************************************************/
 
     public void departmentsScript(String clientId) {
@@ -104,7 +110,7 @@ public class ClientResourceTest extends JerseyTest {
 
         Holder<Department> forDepP = getDepartments();
         List<Department> deps = forDepP.getItems();
-        for(Department department : deps ) {
+        for (Department department : deps) {
             projectScript(clientId, (String) department.get_id());
         }
     }
@@ -130,7 +136,8 @@ public class ClientResourceTest extends JerseyTest {
                         .request().get(String.class);
         System.out.println(deps_str);
 
-        Holder<Department> departmentsHolder = new Gson().fromJson(deps_str, Holder.class);
+        Type fooType = new TypeToken<Holder<Department>>() {}.getType();
+        Holder<Department> departmentsHolder = new Gson().fromJson(deps_str, fooType);
 
         return departmentsHolder;
     }
@@ -141,7 +148,7 @@ public class ClientResourceTest extends JerseyTest {
         int before = getProjectsDepartment(departmentId).getItems().size();
         createProjectForDepartment(clientId, departmentId);
         int after = getProjectsDepartment(departmentId).getItems().size();
-        assertTrue( (after - before) == 0 );
+        assertTrue((after - before) == 0);
     }
 
     public Holder<Project> getProjectsDepartment(String departmentId) {
@@ -155,7 +162,7 @@ public class ClientResourceTest extends JerseyTest {
         Project project = new Project();
         project.setTitle("Project " + getTSS());
         project.setDescription("Description " + getTSS());
-        project.setDeadline( System.currentTimeMillis() + 60 * 60 * 1000 * 12 );
+        project.setDeadline(System.currentTimeMillis() + 60 * 60 * 1000 * 12);
         project.setDepartmentId(departmentId);
 
         Holder<User> users = getUsers(clientId);
@@ -165,7 +172,7 @@ public class ClientResourceTest extends JerseyTest {
 
         Response response = target("departments").path(departmentId).path("projects")
                 .request(MediaType.APPLICATION_JSON_TYPE)
-                .post( Entity.entity(project.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+                .post(Entity.entity(project.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
         assertNotNull(response);
     }
 
