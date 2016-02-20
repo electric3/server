@@ -19,6 +19,7 @@ public class ClientsResource {
 
     @POST
     public Response create(String json) {
+        log.info("create new client");
         ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
         try {
             Client client = Client.deserialize(json, Client.class);
@@ -33,6 +34,7 @@ public class ClientsResource {
     @GET
     @Path("{clientId}/departments")
     public Response getClientDepartments(@PathParam("clientId") String clientId) {
+        log.info("get client departments");
         ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
         try {
             return Response.ok(clientsDBManager.getClientDepartments(clientId), MediaType.APPLICATION_JSON).build();
@@ -45,6 +47,7 @@ public class ClientsResource {
     @GET
     @Path("/info/{userId}")
     public Response getClientByOwner(@PathParam("userId") String userId) {
+        log.info("get client by owner");
         ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
         try {
             return Response.ok(clientsDBManager.getClientByOwner(userId), MediaType.APPLICATION_JSON).build();
@@ -57,6 +60,7 @@ public class ClientsResource {
     @POST
     @Path("{clientId}/departments")
     public Response createDepartment(@PathParam("clientId") String clientId, String json) {
+        log.info("create client department");
         ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
         try {
             Department department = Department.deserialize(json, Department.class);
@@ -71,6 +75,7 @@ public class ClientsResource {
     @POST
     @Path("{clientId}/owner")
     public Response setOwner(@PathParam("clientId") String clientId, String json) {
+        log.info("set client owner");
         ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
         try {
             User user = User.deserialize(json, User.class);
