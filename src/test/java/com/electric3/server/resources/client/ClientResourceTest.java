@@ -3,6 +3,7 @@ package com.electric3.server.resources.client;
 import com.electric3.dataatoms.*;
 import com.electric3.server.resources.clients.ClientsResource;
 import com.electric3.server.resources.departments.DepartmentsResource;
+import com.electric3.server.resources.users.UsersResource;
 import com.electric3.server.resources.utils.Mock;
 import com.google.gson.Gson;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -28,15 +29,32 @@ import static org.junit.Assert.assertTrue;
 public class ClientResourceTest extends JerseyTest {
     @Override
     protected Application configure() {
-        return new ResourceConfig(ClientsResource.class, DepartmentsResource.class);
+        return new ResourceConfig(ClientsResource.class, DepartmentsResource.class, UsersResource.class);
     }
 
     @Test
     public void testForDirector() {
+        createUser();
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Holder<User> users = getUsers();
+        int ownerId = ThreadLocalRandom.current().nextInt(0, users.getItems().size());
+        User testingUser = users.getItems().get(ownerId);
+        createClient(testingUser);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         final String client_response_str =
                 target("clients")
                         .path("info")
-                        .path(Mock.getUserDirector().getUser_id())
+                        .path(testingUser.getUser_id())
                         .request(MediaType.APPLICATION_JSON_TYPE)
                         .get(String.class);
         assertNotNull(client_response_str);
@@ -47,6 +65,42 @@ public class ClientResourceTest extends JerseyTest {
 
         usersScenario(getClientId());
         departmentsScript(getClientId());
+    }
+
+    public void createClient(User user) {
+        Client client = new Client();
+        client.setEmail(user.getEmail());
+        client.setTitle("Cli t " + getTSS());
+        client.setDescription("Cli d " + getTSS());
+        client.setOwner(user);
+        client.setPhone("+7 981 772 74 49");
+        target("clients").request(MediaType.APPLICATION_JSON_TYPE)
+        .post(Entity.entity(client.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+    }
+
+    public Holder<User> getUsers() {
+        String users = target("users").request().get(String.class);
+        Type fooType = new TypeToken<Holder<User>>() {}.getType();
+        Holder<User> usersHolder = new Gson().fromJson(users, fooType);
+        return usersHolder;
+    }
+
+    public void createUser() {
+        User user = new User();
+        User.UserMetadata userMetadata = user.new UserMetadata();
+        userMetadata.setName("F: " + getTSS());
+        userMetadata.setSkypeName("skype");
+        userMetadata.setPhotoUrl("https://pbs.twimg.com/profile_images/679653172244262912/q8D6AbS4.jpg");
+        userMetadata.setPhone("+" + System.currentTimeMillis());
+        userMetadata.setRole(UserRole.DIRECTOR);
+        user.setUser_metadata(userMetadata);
+        user.setPassword("xyi");
+        user.setEmail(System.currentTimeMillis() + "@" + System.currentTimeMillis() + ".com");
+
+        Response user_resp =
+                target("users")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(user.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
     }
 
     /******************************************************************************************************************/
