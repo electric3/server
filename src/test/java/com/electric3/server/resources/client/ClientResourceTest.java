@@ -294,8 +294,10 @@ public class ClientResourceTest extends JerseyTest {
         }
 
         deliveries = getDeliveries(projectId);
+        System.out.println("there are " + deliveries.getItems().size() + " deliveries");
         List<Delivery> items = deliveries.getItems();
         for( Delivery delivery : items ) {
+            System.out.println("now will be adding of comment ");
             deliveryScenario((String)delivery.get_id(), clientId);
         }
     }
