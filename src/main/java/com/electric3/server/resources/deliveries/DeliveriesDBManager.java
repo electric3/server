@@ -84,10 +84,18 @@ public class DeliveriesDBManager extends NoSqlBase {
         Action action = new Action();
         action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         action.setProjectId(delivery.getProjectId());
-        action.setActionStringRepresentation(String.format("Delivery '%s' status has been changed to %s",
-                delivery.getTitle(), StatusEnum.values()[statusId]));
+
+        String text = String.format("Delivery '%s' status has been changed to %s",
+                delivery.getTitle(), StatusEnum.values()[statusId]);
+
+        action.setActionStringRepresentation(text);
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         actionsDBManager.createAction(action);
+
+        Comment comment = new Comment();
+        comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        comment.setComment(text);
+        addComment(deliveryId, comment);
     }
 
     public void setProgress(String deliveryId, int progressValue) {
@@ -104,10 +112,18 @@ public class DeliveriesDBManager extends NoSqlBase {
         Action action = new Action();
         action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         action.setProjectId(delivery.getProjectId());
-        action.setActionStringRepresentation(String.format("Delivery '%s' progress has been changed to %s",
-                delivery.getTitle(), progressValue));
+
+        String text = String.format("Delivery '%s' progress has been changed to %s",
+                delivery.getTitle(), progressValue);
+
+        action.setActionStringRepresentation(text);
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         actionsDBManager.createAction(action);
+
+        Comment comment = new Comment();
+        comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        comment.setComment(text);
+        addComment(deliveryId, comment);
     }
 
     public void addComment(String deliveryId, Comment comment) {
@@ -149,9 +165,17 @@ public class DeliveriesDBManager extends NoSqlBase {
         Action action = new Action();
         action.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         action.setProjectId(delivery.getProjectId());
-        action.setActionStringRepresentation(String.format("Delivery '%s' has a new assignee",
-                delivery.getTitle()));
+
+        String text = String.format("Delivery '%s' has a new assignee",
+                delivery.getTitle());
+
+        action.setActionStringRepresentation(text);
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         actionsDBManager.createAction(action);
+
+        Comment comment = new Comment();
+        comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
+        comment.setComment(text);
+        addComment(deliveryId, comment);
     }
 }
