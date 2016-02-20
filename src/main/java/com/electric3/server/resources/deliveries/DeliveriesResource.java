@@ -68,11 +68,11 @@ public class DeliveriesResource {
 
     @POST
     @Path("{deliveryId}/assignee")
-    public Response setOwner(@PathParam("deliveryId") String deliveryId, String json) {
+    public Response setAssignee(@PathParam("deliveryId") String deliveryId, String json) {
         DeliveriesDBManager deliveriesDBManager = DeliveriesDBManager.getInstance();
         try {
             User user = User.deserialize(json, User.class);
-            deliveriesDBManager.setOwner(deliveryId, user);
+            deliveriesDBManager.setAssignee(deliveryId, user);
             return Response.ok().build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));

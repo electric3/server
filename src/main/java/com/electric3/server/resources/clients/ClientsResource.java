@@ -2,6 +2,7 @@ package com.electric3.server.resources.clients;
 
 import com.electric3.dataatoms.Client;
 import com.electric3.dataatoms.Department;
+import com.electric3.dataatoms.User;
 import com.electric3.server.utils.StackTraceUtils;
 
 import javax.ws.rs.GET;
@@ -60,6 +61,20 @@ public class ClientsResource {
         try {
             Department department = Department.deserialize(json, Department.class);
             clientsDBManager.createDepartment(clientId, department);
+            return Response.ok().build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
+    @POST
+    @Path("{clientId}/owner")
+    public Response setOwner(@PathParam("clientId") String clientId, String json) {
+        ClientsDBManager clientsDBManager = ClientsDBManager.getInstance();
+        try {
+            User user = User.deserialize(json, User.class);
+            clientsDBManager.setOwner(clientId, user);
             return Response.ok().build();
         } catch (Exception e) {
             log.severe(StackTraceUtils.getStackTrace(e));

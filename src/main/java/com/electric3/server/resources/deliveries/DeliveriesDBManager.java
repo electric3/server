@@ -103,7 +103,7 @@ public class DeliveriesDBManager extends NoSqlBase {
                         new Document("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
 
-    public void setOwner(String deliveryId, User user) {
+    public void setAssignee(String deliveryId, User user) {
         log.info(String.format("set delivery %s new assignee", deliveryId));
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();

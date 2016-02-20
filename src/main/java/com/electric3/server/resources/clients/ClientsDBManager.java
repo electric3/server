@@ -3,11 +3,13 @@ package com.electric3.server.resources.clients;
 import com.electric3.dataatoms.Client;
 import com.electric3.dataatoms.Department;
 import com.electric3.dataatoms.Holder;
+import com.electric3.dataatoms.User;
 import com.electric3.server.database.NoSqlBase;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,5 +80,16 @@ public class ClientsDBManager extends NoSqlBase {
         Client client = Client.deserialize(doc.toJson(), Client.class);
         client.set_id(convertObjectId(client.get_id()));
         return client.serialize();
+    }
+
+    public void setOwner(String clientId, User user) {
+        log.info(String.format("set client %s new owner", clientId));
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_CLIENTS);
+        collection.updateOne(eq("_id", new ObjectId(clientId)),
+                new Document("$set",
+                        new Document("owner", Document.parse(user.serialize())).
+                                append("modifiedAt", String.valueOf(System.currentTimeMillis() / 1000))));
     }
 }
