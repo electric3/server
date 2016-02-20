@@ -12,6 +12,9 @@ import java.lang.reflect.Type;
 import java.util.logging.Logger;
 
 public class NoSqlBase {
+
+    protected final String DBNAME = "projectrack";
+
     public enum ConnectionFactory {
         CONNECTION;
         private Logger log = null;
