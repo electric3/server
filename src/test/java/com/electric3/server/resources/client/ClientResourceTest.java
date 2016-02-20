@@ -197,10 +197,12 @@ public class ClientResourceTest extends JerseyTest {
 
     public void departmentsScript(String clientId) {
         Holder<Department> departments = getDepartments();
-        int before = departments.getItems().size();
-        createNewDepartment(getRandomUser());
-        int after = getDepartments().getItems().size();
-        assertTrue((after - before) == 1);
+        if( departments.getItems().size() < 3 ) {
+            int before = departments.getItems().size();
+            createNewDepartment(getRandomUser());
+            int after = getDepartments().getItems().size();
+            assertTrue((after - before) == 1);
+        }
 
         Holder<Department> forDepP = getDepartments();
         List<Department> deps = forDepP.getItems();
@@ -242,7 +244,7 @@ public class ClientResourceTest extends JerseyTest {
 
     public void departmentScenario(String clientId, String departmentId) {
         int before = getProjectsDepartment(departmentId).getItems().size();
-        if( before < 6 ) {
+        if( before < 3 ) {
             createProjectForDepartment(clientId, departmentId);
             int after = getProjectsDepartment(departmentId).getItems().size();
             assertTrue((after - before) == 1);
@@ -349,6 +351,7 @@ public class ClientResourceTest extends JerseyTest {
     }
 
     public void deliveryAddComment(String str_comment, String deliveryId, User author) {
+        System.out.println("delivery add comment ");
         Comment comment = new Comment();
         comment.setComment(str_comment);
         comment.setAuthor( author );
@@ -356,6 +359,7 @@ public class ClientResourceTest extends JerseyTest {
         Response response = target("deliveries").path(deliveryId).path("comment")
         .request(MediaType.APPLICATION_JSON_TYPE)
         .post(Entity.entity(comment.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class );
+        assertNotNull(response);
     }
 
     /******************************************************************************************************************/
