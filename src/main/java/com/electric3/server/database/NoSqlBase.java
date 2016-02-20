@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoDatabase;
 import org.bson.types.ObjectId;
 
 import java.lang.reflect.Type;
@@ -13,26 +15,28 @@ import java.util.logging.Logger;
 
 public class NoSqlBase {
 
-    protected final String DBNAME = "projectrack";
+    private static final String DBNAME = "projectrack";
 
     public enum ConnectionFactory {
         CONNECTION;
         private Logger log = null;
         private MongoClient client = null;
+        private MongoDatabase database = null;
 
         ConnectionFactory() {
             try {
-                client = new MongoClient();
+                client = new MongoClient(new MongoClientURI("mongodb://casper1149.koding.io:27017"));
+                database = client.getDatabase(DBNAME);
             } catch (Exception e) {
                 log = Logger.getLogger(ConnectionFactory.class.getName());
                 log.severe(StackTraceUtils.getStackTrace(e));
             }
         }
 
-        public MongoClient getClient() {
-            if (client == null)
+        public MongoDatabase getClientDatabase() {
+            if (client == null || database == null)
                 throw new RuntimeException();
-            return client;
+            return database;
         }
     }
 
