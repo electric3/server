@@ -59,7 +59,8 @@ public class DeliveriesResourceTest extends JerseyTest {
         assertNotNull( result );
     }
 
-    @Test void testGetDeliveryComments() {
+    @Test
+    public void testGetDeliveryComments() {
         final String response = target("deliveries").path("1").path("comments").request().get(String.class);
         Holder holder = new Gson().fromJson(response, Holder.class);
         assertNotNull(holder);
