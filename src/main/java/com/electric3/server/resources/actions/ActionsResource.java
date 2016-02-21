@@ -42,7 +42,7 @@ public class ActionsResource {
     @GET
     @Path("/project/{id}")
     public Response getProjectActions(@PathParam("id") String projectId) {
-        log.info("get actions for department");
+        log.info("get actions for project");
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         try {
             return Response.ok(actionsDBManager.getProjectActions(projectId), MediaType.APPLICATION_JSON).build();
