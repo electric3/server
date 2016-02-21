@@ -3,6 +3,7 @@ package com.electric3.server.resources.deliveries;
 import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.actions.ActionsDBManager;
+import com.electric3.server.resources.projects.ProjectsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
@@ -99,6 +100,9 @@ public class DeliveriesDBManager extends NoSqlBase {
         comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         comment.setComment(text);
         addComment(deliveryId, comment);
+
+        ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
+        projectsDBManager.setStatusRecalculation(delivery.getProjectId());
     }
 
     public void setProgress(String deliveryId, int progressValue) {
@@ -127,6 +131,9 @@ public class DeliveriesDBManager extends NoSqlBase {
         comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         comment.setComment(text);
         addComment(deliveryId, comment);
+
+        ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
+        projectsDBManager.setProgressRecalculation(delivery.getProjectId());
     }
 
     public void addComment(String deliveryId, Comment comment) {

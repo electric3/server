@@ -118,4 +118,42 @@ public class ProjectsDBManager extends NoSqlBase {
 
         return projectsHolder.serialize();
     }
+
+    public void setStatusRecalculation(String projectId) {
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+
+        collection.updateOne(eq("_id", new ObjectId(projectId)),
+                new Document("$set",
+                        new Document("isStatusRecalculationRequired", 1).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
+        collection.updateOne(eq("_id", new ObjectId(project.getDepartmentId())),
+                new Document("$set",
+                        new Document("isStatusRecalculationRequired", 1).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+    }
+
+    public void setProgressRecalculation(String projectId) {
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+
+        collection.updateOne(eq("_id", new ObjectId(projectId)),
+                new Document("$set",
+                        new Document("isProgressRecalculationRequired", 1).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
+        collection.updateOne(eq("_id", new ObjectId(project.getDepartmentId())),
+                new Document("$set",
+                        new Document("isProgressRecalculationRequired", 1).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+    }
 }
