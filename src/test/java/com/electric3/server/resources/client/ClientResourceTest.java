@@ -8,6 +8,7 @@ import com.electric3.server.resources.departments.DepartmentsResource;
 import com.electric3.server.resources.projects.ProjectsResource;
 import com.electric3.server.resources.users.UsersResource;
 import com.electric3.server.resources.utils.Mock;
+import com.electric3.server.utils.StatusCalculator;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoDatabase;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,10 +39,88 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
+        //testStatusCalculator();
         //clearDB();
         //ivanScenario();
         //playWithStatus(getClientId());
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
+    }
+
+    public void testStatusCalculator( ) {
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.GREEN, StatusEnum.ORANGE).equals(StatusEnum.ORANGE));
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.ORANGE, StatusEnum.RED).equals(StatusEnum.RED));
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.GREEN, StatusEnum.RED).equals(StatusEnum.RED));
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.ORANGE, StatusEnum.GREEN).equals(StatusEnum.ORANGE));
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.RED, StatusEnum.GREEN).equals(StatusEnum.RED));
+        assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.RED, StatusEnum.ORANGE).equals(StatusEnum.RED));
+
+        List<Delivery> stubDeliveries = getStubDeliveries(StatusEnum.GREEN);
+
+        StatusEnum worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+
+        setStubColor(stubDeliveries, 0, StatusEnum.RED);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.RED));
+
+        setStubColor(stubDeliveries, 2, StatusEnum.ORANGE);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.RED));
+
+        setStubColor(stubDeliveries, 0, StatusEnum.ORANGE);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.ORANGE));
+
+        setStubColor(stubDeliveries, 1, StatusEnum.ORANGE);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.ORANGE));
+
+        setStubColor(stubDeliveries, 6, StatusEnum.RED);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.RED));
+
+        setStubColor(stubDeliveries, 0, StatusEnum.GREEN);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.RED));
+
+        setStubColor(stubDeliveries, 1, StatusEnum.GREEN);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.RED));
+
+        setStubColor(stubDeliveries, 6, StatusEnum.GREEN);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.ORANGE));
+
+        setStubColor(stubDeliveries, 2, StatusEnum.GREEN);
+        worse = StatusCalculator.ME.selectWorseOnSet(stubDeliveries);
+        System.out.println("worse " + worse);
+        assertTrue(worse.equals(StatusEnum.GREEN));
+    }
+
+    public void setStubColor( List<? extends IStatusProvider> statusProviders, int index, StatusEnum color) {
+        statusProviders.get(index).setStatus(color);
+    }
+
+    public List<Delivery> getStubDeliveries(StatusEnum color) {
+        List<Delivery> deliveries = new LinkedList<Delivery>();
+        for( int i = 0; i < 7; i++) {
+            Delivery delivery = new Delivery();
+            delivery.setStatus(color);
+            deliveries.add(delivery);
+        }
+        return deliveries;
+    }
+
+    public void testSetStatusCalculator(List<IStatusProvider> statusProviders) {
+
     }
 
     public void createTestOutput(String clientId) {
@@ -496,6 +576,11 @@ public class ClientResourceTest extends JerseyTest {
 
         for(Delivery delivery : items) {
             putDeliveryToColor((String)delivery.get_id(), newStatus);
+        }
+        deliveries = getDeliveries(projectId);
+        items = deliveries.getItems();
+        for(Delivery delivery : items) {
+            assertTrue(delivery.getStatus().equals(newStatus));
         }
     }
 

@@ -3,6 +3,7 @@ package com.electric3.server.resources.projects;
 import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.actions.ActionsDBManager;
+import com.electric3.server.resources.deliveries.DeliveriesDBManager;
 import com.electric3.server.resources.departments.DepartmentsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
@@ -36,6 +37,14 @@ public class ProjectsDBManager extends NoSqlBase {
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
 
         Holder<Delivery> deliveriesHolder = new Holder<>();
+        List<Delivery> deliveries = getDeliveries(collection, projectId);
+
+        deliveriesHolder.setItems(deliveries);
+
+        return deliveriesHolder.serialize();
+    }
+
+    private List<Delivery> getDeliveries(MongoCollection<Document> collection, String projectId) {
         List<Delivery> deliveries = new ArrayList<>();
 
         collection.find(eq("projectId", projectId))
@@ -46,9 +55,7 @@ public class ProjectsDBManager extends NoSqlBase {
                     deliveries.add(delivery);
                 });
 
-        deliveriesHolder.setItems(deliveries);
-
-        return deliveriesHolder.serialize();
+        return deliveries;
     }
 
     public void createDelivery(String projectId, Delivery delivery) {
@@ -174,6 +181,15 @@ public class ProjectsDBManager extends NoSqlBase {
 
         Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
         Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        StatusEnum currentStatus = project.getStatus();
+        MongoCollection<Document> deliveriesCollection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
+        List<Delivery> deliveries = getDeliveries(deliveriesCollection, projectId);
+
+        for( Delivery delivery : deliveries ) {
+
+        }
+
 
         DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
         departmentsDBManager.recalculateStatus(project.getDepartmentId());
