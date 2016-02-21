@@ -80,7 +80,7 @@ public class ActionsDBManager extends NoSqlBase {
         Holder<Action> actionsHolder = new Holder<>();
         List<Action> actions = new ArrayList<>();
 
-        collection.find(eq("departmentId", projectId))
+        collection.find(eq("projectId", projectId))
                 .sort(new Document("timestamp", -1))
                 .forEach((Block<Document>) doc -> {
                     Action action = Action.deserialize(doc.toJson(), Action.class);
