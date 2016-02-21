@@ -31,7 +31,7 @@ public class NoSqlBase {
 
         ConnectionFactory() {
             try {
-                client = new MongoClient(new MongoClientURI("mongodb://casper1149.koding.io:27017"));
+                client = new MongoClient(new MongoClientURI("mongodb://169.45.106.72:27017"));
                 database = client.getDatabase(DBNAME);
             } catch (Exception e) {
                 log = Logger.getLogger(ConnectionFactory.class.getName());
