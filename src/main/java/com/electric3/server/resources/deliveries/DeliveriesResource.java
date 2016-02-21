@@ -30,6 +30,19 @@ public class DeliveriesResource {
     }
 
     @GET
+    @Path("/user/{id}")
+    public Response getUserDeliveries(@PathParam("id") String userId) {
+        log.info("get user deliveries");
+        DeliveriesDBManager deliveriesDBManager = DeliveriesDBManager.getInstance();
+        try {
+            return Response.ok(deliveriesDBManager.getUserDeliveries(userId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
+    @GET
     @Path("{id}/comments")
     public Response getDeliveryComments(@PathParam("id") String deliveryId) {
         log.info("get delivery comments");

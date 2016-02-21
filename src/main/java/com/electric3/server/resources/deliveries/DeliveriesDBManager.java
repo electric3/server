@@ -4,11 +4,14 @@ import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.actions.ActionsDBManager;
 import com.electric3.server.utils.UtilityMethods;
+import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -177,5 +180,27 @@ public class DeliveriesDBManager extends NoSqlBase {
         comment.setTimestamp(UtilityMethods.getCurrentTimestampAsString());
         comment.setComment(text);
         addComment(deliveryId, comment);
+    }
+
+    public String getUserDeliveries(String userId) {
+        log.info("getUserDeliveries for " + userId);
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DELIVERIES);
+
+        Holder<Delivery> deliveriesHolder = new Holder<>();
+        List<Delivery> deliveries = new ArrayList<>();
+
+        collection.find(eq("assignee.user_id", userId))
+                .sort(new Document("modifiedAt", -1))
+                .forEach((Block<Document>) doc -> {
+                    Delivery delivery = Delivery.deserialize(doc.toJson(), Delivery.class);
+                    delivery.set_id(convertObjectId(delivery.get_id()));
+                    deliveries.add(delivery);
+                });
+
+        deliveriesHolder.setItems(deliveries);
+
+        return deliveriesHolder.serialize();
     }
 }
