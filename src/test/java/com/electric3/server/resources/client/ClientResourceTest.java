@@ -39,10 +39,10 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
-        //testStatusCalculator();
-        //clearDB();
-        //ivanScenario();
-        //playWithStatus(getClientId());
+        testStatusCalculator();
+        clearDB();
+        ivanScenario();
+        playWithStatusScenario(getClientId());
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
     }
 
@@ -318,8 +318,8 @@ public class ClientResourceTest extends JerseyTest {
     public void departmentsScript(String clientId) {
         Holder<Department> departments = getDepartments();
         Holder<User> users = getUsers(clientId);
-        if( departments.getItems().size() < 3 ) {
-            for( int i = 0; i < 3; i++ ) {
+        if( departments.getItems().size() < 2 ) {
+            for( int i = 0; i < 2; i++ ) {
                 createNewDepartment(getRandomUser(users));
             }
         }
@@ -377,8 +377,8 @@ public class ClientResourceTest extends JerseyTest {
 
     public void departmentScenario(String clientId, String departmentId) {
         int before = getProjects(departmentId).getItems().size();
-        if( before < 6 ) {
-            for( int i = 0; i < 6; i++ ) {
+        if( before < 2 ) {
+            for( int i = 0; i < 2; i++ ) {
                 createProjectForDepartment(clientId, departmentId);
             }
         }
@@ -424,8 +424,8 @@ public class ClientResourceTest extends JerseyTest {
         Holder<Delivery> deliveries = getDeliveries(projectId);
         int before = deliveries.getItems().size();
 
-        if( before < 6 ) {
-            for( int i = 0; i < 6; i++ ) {
+        if( before < 3 ) {
+            for( int i = 0; i < 3; i++ ) {
                 createDelivery(projectId, clientId);
             }
         }
@@ -548,16 +548,36 @@ public class ClientResourceTest extends JerseyTest {
 
     /******************************************************************************************************************/
 
-    public void playWithStatus(String clientId) {
-        putAllToGreen(clientId);
+    public void playWithStatusScenario( String clientId ) {
+        Holder<Department> departments = getDepartments(clientId);
+        playWithStatus(clientId, StatusEnum.GREEN);
+        playWithStatus(clientId, StatusEnum.ORANGE);
+        playWithStatus(clientId, StatusEnum.RED);
+        playWithStatus(clientId, StatusEnum.GREEN);
+        playWithStatus(clientId, StatusEnum.ORANGE);
     }
 
-    public void putAllToGreen( String clientId ) {
+    public void playWithStatus(String clientId, StatusEnum newColor) {
         Holder<Department> departments = getDepartments(clientId);
         List<Department> items = departments.getItems();
         for( Department department : items ) {
             String departmentId = (String)department.get_id();
-            colorifyDepartment(departmentId, StatusEnum.GREEN);
+            colorifyDepartment(departmentId, newColor);
+        }
+        departments = getDepartments(clientId);
+        checkDepartmentColor(departments.getItems(), newColor);
+    }
+
+    public void checkDepartmentColor(List<Department> items, StatusEnum newColor) {
+        for( Department department : items) {
+            assertTrue(department.getStatus().equals(newColor));
+            checkProjects(getProjects((String) department.get_id()).getItems(), newColor);
+        }
+    }
+
+    public void checkProjects(List<Project> items, StatusEnum newColor) {
+        for( Project project : items) {
+            assertTrue(project.getStatus().equals(newColor));
         }
     }
 

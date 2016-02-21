@@ -102,7 +102,7 @@ public class DeliveriesDBManager extends NoSqlBase {
         addComment(deliveryId, comment);
 
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
-        projectsDBManager.recalculateStatus(delivery.getProjectId());
+        projectsDBManager.recalculateStatus(delivery.getProjectId(), StatusEnum.values()[statusId]);
     }
 
     public void setProgress(String deliveryId, int progressValue) {

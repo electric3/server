@@ -3,6 +3,7 @@ package com.electric3.server.resources.departments;
 import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.actions.ActionsDBManager;
+import com.electric3.server.utils.StatusCalculator;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
@@ -60,6 +61,13 @@ public class DepartmentsDBManager extends NoSqlBase {
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
 
         Holder<Project> projects = new Holder<>();
+        List<Project> projectsList = getDepartmentProjects(departmentId, collection);
+        projects.setItems(projectsList);
+
+        return projects.serialize();
+    }
+
+    public List<Project> getDepartmentProjects(String departmentId, MongoCollection<Document> collection) {
         List<Project> projectsList = new ArrayList<>();
 
         collection.find(eq("departmentId", departmentId))
@@ -70,22 +78,26 @@ public class DepartmentsDBManager extends NoSqlBase {
                     projectsList.add(project);
                 });
 
-        projects.setItems(projectsList);
-
-        return projects.serialize();
+        return projectsList;
     }
 
-    public void recalculateStatus(String departmentId) {
-        //TODO calculate
-
-        int newStatus = 0;
+    public void recalculateStatus(String departmentId, StatusEnum newStatus) {
 
         MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
         MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
 
+        if( !newStatus.equals(StatusEnum.RED) ) {
+            Document document = collection.find(eq("_id", departmentId)).first();
+            if( null != document ) {
+                MongoCollection<Document> projectsCollection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+                List<Project> projects = getDepartmentProjects(departmentId, projectsCollection);
+                newStatus = StatusCalculator.ME.selectWorseOnSet(projects);
+            }
+        }
+
         collection.updateOne(eq("_id", new ObjectId(departmentId)),
                 new Document("$set",
-                        new Document("status", newStatus).
+                        new Document("status", newStatus.getValue()).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
     }
 
