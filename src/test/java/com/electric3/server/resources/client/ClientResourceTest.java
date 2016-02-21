@@ -24,7 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertNotNull;
@@ -38,8 +37,9 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
-        clearDB();
-        ivanScenario();
+        //clearDB();
+        //ivanScenario();
+        //playWithStatus(getClientId());
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
     }
 
@@ -54,7 +54,7 @@ public class ClientResourceTest extends JerseyTest {
         System.out.println(departments.serialize());
 
         System.out.println("project");
-        Holder<Project> projects = getProjectsDepartment((String) departments.getItems().get(0).get_id());
+        Holder<Project> projects = getProjects((String) departments.getItems().get(0).get_id());
         System.out.println(projects.serialize());
 
         System.out.println("deliveries");
@@ -296,21 +296,21 @@ public class ClientResourceTest extends JerseyTest {
     /******************************************************************************************************************/
 
     public void departmentScenario(String clientId, String departmentId) {
-        int before = getProjectsDepartment(departmentId).getItems().size();
+        int before = getProjects(departmentId).getItems().size();
         if( before < 6 ) {
             for( int i = 0; i < 6; i++ ) {
                 createProjectForDepartment(clientId, departmentId);
             }
         }
 
-        List<Project> items = getProjectsDepartment(departmentId).getItems();
+        List<Project> items = getProjects(departmentId).getItems();
         for(Project project : items) {
             projectScenario((String)project.get_id(), clientId);
         }
 
     }
 
-    public Holder<Project> getProjectsDepartment(String departmentId) {
+    public Holder<Project> getProjects(String departmentId) {
         String result = target("departments").path(departmentId).path("projects")
                 .request().get(String.class);
         Type fooType = new TypeToken<Holder<Project>>() {}.getType();
@@ -465,4 +465,61 @@ public class ClientResourceTest extends JerseyTest {
         return users.getItems().get(ownerId);
     }
 
+
+    /******************************************************************************************************************/
+
+    public void playWithStatus(String clientId) {
+        putAllToGreen(clientId);
+    }
+
+    public void putAllToGreen( String clientId ) {
+        Holder<Department> departments = getDepartments(clientId);
+        List<Department> items = departments.getItems();
+        for( Department department : items ) {
+            String departmentId = (String)department.get_id();
+            colorifyDepartment(departmentId, StatusEnum.GREEN);
+        }
+    }
+
+    public void colorifyDepartment(String departmentId, StatusEnum newStatus) {
+        Holder<Project> projectsDepartment = getProjects(departmentId);
+        List<Project> items = projectsDepartment.getItems();
+        for(Project project : items) {
+            colorifyProject((String)project.get_id(), newStatus);
+        }
+
+    }
+
+    public void colorifyProject(String projectId, StatusEnum newStatus) {
+        Holder<Delivery> deliveries = getDeliveries(projectId);
+        List<Delivery> items = deliveries.getItems();
+
+        for(Delivery delivery : items) {
+            putDeliveryToColor((String)delivery.get_id(), newStatus);
+        }
+    }
+
+
+    public void putDeliveryToColor(String deliveryId, StatusEnum newStatus) {
+        //{id}/setStatus/{statusId}
+        Response response = target("deliveries").path(deliveryId).path("setStatus").path(newStatus.getValue())
+        .request().get(Response.class);
+        assertNotNull(response);
+    }
+
+    public void playWithColorsChanges(String clientId) {
+        Holder<Department> departments = getDepartments(clientId);
+        Department department = departments.getItems().get(0);
+        playColorChangesDepartment((String)department.get_id());
+    }
+
+    public void playColorChangesDepartment(String departmentId) {
+
+    }
+
+    /******************************************************************************************************************/
+
+    public void playWithProgress(String clientId) {
+
+    }
 }
