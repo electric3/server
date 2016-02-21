@@ -29,6 +29,19 @@ public class ProjectsResource {
         }
     }
 
+    @GET
+    @Path("user/{userId}")
+    public Response getUserProjects(@PathParam("userId") String userId) {
+        log.info("get user projects");
+        ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
+        try {
+            return Response.ok(projectsDBManager.getUserProjects(userId), MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            log.severe(StackTraceUtils.getStackTrace(e));
+            return Response.serverError().build();
+        }
+    }
+
     @POST
     @Path("{projectId}/deliveries")
     public Response createDelivery(@PathParam("projectId") String projectId, String json) {

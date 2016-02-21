@@ -96,4 +96,26 @@ public class ProjectsDBManager extends NoSqlBase {
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         actionsDBManager.createAction(action);
     }
+
+    public String getUserProjects(String userId) {
+        log.info("getUserProjects for " + userId);
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+
+        Holder<Project> projectsHolder = new Holder<>();
+        List<Project> projects = new ArrayList<>();
+
+        collection.find(eq("owner.user_id", userId))
+                .sort(new Document("modifiedAt", -1))
+                .forEach((Block<Document>) doc -> {
+                    Project project = Project.deserialize(doc.toJson(), Project.class);
+                    project.set_id(convertObjectId(project.get_id()));
+                    projects.add(project);
+                });
+
+        projectsHolder.setItems(projects);
+
+        return projectsHolder.serialize();
+    }
 }
