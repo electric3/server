@@ -3,6 +3,7 @@ package com.electric3.server.resources.projects;
 import com.electric3.dataatoms.*;
 import com.electric3.server.database.NoSqlBase;
 import com.electric3.server.resources.actions.ActionsDBManager;
+import com.electric3.server.resources.departments.DepartmentsDBManager;
 import com.electric3.server.utils.UtilityMethods;
 import com.mongodb.Block;
 import com.mongodb.client.MongoCollection;
@@ -155,5 +156,47 @@ public class ProjectsDBManager extends NoSqlBase {
                 new Document("$set",
                         new Document("isProgressRecalculationRequired", 1).
                                 append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+    }
+
+    public void recalculateStatus(String projectId) {
+
+        //TODO calculate
+
+        int newStatus = 0;
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+
+        collection.updateOne(eq("_id", new ObjectId(projectId)),
+                new Document("$set",
+                        new Document("status", newStatus).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        departmentsDBManager.recalculateStatus(project.getDepartmentId());
+    }
+
+    public void recalculateProgress(String projectId) {
+
+        //TODO calculate
+
+        int newProgress = 0;
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_PROJECTS);
+
+        collection.updateOne(eq("_id", new ObjectId(projectId)),
+                new Document("$set",
+                        new Document("progress", newProgress).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+
+        Document projectDoc = collection.find(eq("_id", new ObjectId(projectId))).first();
+        Project project = Project.deserialize(projectDoc.toJson(), Project.class);
+
+        DepartmentsDBManager departmentsDBManager = DepartmentsDBManager.getInstance();
+        departmentsDBManager.recalculateProgress(project.getDepartmentId());
     }
 }

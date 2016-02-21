@@ -74,4 +74,32 @@ public class DepartmentsDBManager extends NoSqlBase {
 
         return projects.serialize();
     }
+
+    public void recalculateStatus(String departmentId) {
+        //TODO calculate
+
+        int newStatus = 0;
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
+
+        collection.updateOne(eq("_id", new ObjectId(departmentId)),
+                new Document("$set",
+                        new Document("status", newStatus).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+    }
+
+    public void recalculateProgress(String departmentId) {
+        //TODO calculate
+
+        int newProgress = 0;
+
+        MongoDatabase database = ConnectionFactory.CONNECTION.getClientDatabase();
+        MongoCollection<Document> collection = database.getCollection(MONGODB_COLLECTION_NAME_DEPARTMENTS);
+
+        collection.updateOne(eq("_id", new ObjectId(departmentId)),
+                new Document("$set",
+                        new Document("progress", newProgress).
+                                append("modifiedAt", UtilityMethods.getCurrentTimestampAsString())));
+    }
 }

@@ -102,7 +102,7 @@ public class DeliveriesDBManager extends NoSqlBase {
         addComment(deliveryId, comment);
 
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
-        projectsDBManager.setStatusRecalculation(delivery.getProjectId());
+        projectsDBManager.recalculateStatus(delivery.getProjectId());
     }
 
     public void setProgress(String deliveryId, int progressValue) {
@@ -133,7 +133,7 @@ public class DeliveriesDBManager extends NoSqlBase {
         addComment(deliveryId, comment);
 
         ProjectsDBManager projectsDBManager = ProjectsDBManager.getInstance();
-        projectsDBManager.setProgressRecalculation(delivery.getProjectId());
+        projectsDBManager.recalculateProgress(delivery.getProjectId());
     }
 
     public void addComment(String deliveryId, Comment comment) {
