@@ -38,6 +38,7 @@ public class ActionsDBManager extends NoSqlBase {
 
         collection.find(eq("clientId", clientId))
                 .sort(new Document("timestamp", -1))
+                .limit(10)
                 .forEach((Block<Document>) doc -> {
                     Action action = Action.deserialize(doc.toJson(), Action.class);
                     action.set_id(convertObjectId(action.get_id()));
@@ -60,6 +61,7 @@ public class ActionsDBManager extends NoSqlBase {
 
         collection.find(eq("departmentId", departmentId))
                 .sort(new Document("timestamp", -1))
+                .limit(10)
                 .forEach((Block<Document>) doc -> {
                     Action action = Action.deserialize(doc.toJson(), Action.class);
                     action.set_id(convertObjectId(action.get_id()));
@@ -82,6 +84,7 @@ public class ActionsDBManager extends NoSqlBase {
 
         collection.find(eq("projectId", projectId))
                 .sort(new Document("timestamp", -1))
+                .limit(10)
                 .forEach((Block<Document>) doc -> {
                     Action action = Action.deserialize(doc.toJson(), Action.class);
                     action.set_id(convertObjectId(action.get_id()));
