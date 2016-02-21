@@ -43,6 +43,29 @@ public class ClientResourceTest extends JerseyTest {
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
     }
 
+    public void createTestOutput(String clientId) {
+        System.out.println(">>>>");
+        System.out.println(">>>>");
+        System.out.println(">>>>");
+        System.out.println(">>>>");
+
+        Holder<Department> departments = getDepartments(clientId);
+        System.out.println("departments");
+        System.out.println(departments.serialize());
+
+        System.out.println("project");
+        Holder<Project> projects = getProjectsDepartment((String) departments.getItems().get(0).get_id());
+        System.out.println(projects.serialize());
+
+        System.out.println("deliveries");
+        Holder<Delivery> deliveries = getDeliveries((String) projects.getItems().get(0).get_id());
+        System.out.println(deliveries.serialize());
+
+        System.out.println("comments");
+        Holder<Comment> comments = getComments((String) deliveries.getItems().get(0).get_id());
+        System.out.println(comments.serialize());
+    }
+
     public void clearDB() {
         MongoDatabase clientDatabase = NoSqlBase.ConnectionFactory.CONNECTION.getClientDatabase();
         clientDatabase.drop();
@@ -82,6 +105,8 @@ public class ClientResourceTest extends JerseyTest {
 
         usersScenario(getClientId());
         departmentsScript(getClientId());
+
+        createTestOutput(getClientId());
     }
 
     public void fullScenario() {
@@ -242,6 +267,19 @@ public class ClientResourceTest extends JerseyTest {
         assertNotNull(newDepartmentResponse);
     }
 
+    public Holder<Department> getDepartments(String clientId) {
+        String deps_str =
+                target("clients")
+                        .path(clientId).path("/departments")
+                        .request().get(String.class);
+        System.out.println(deps_str);
+
+        Type fooType = new TypeToken<Holder<Department>>() {}.getType();
+        Holder<Department> departmentsHolder = new Gson().fromJson(deps_str, fooType);
+
+        return departmentsHolder;
+    }
+
     public Holder<Department> getDepartments() {
         String deps_str =
                 target("clients")
@@ -375,6 +413,13 @@ public class ClientResourceTest extends JerseyTest {
         .request(MediaType.APPLICATION_JSON_TYPE)
         .post(Entity.entity(comment.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class );
         assertNotNull(response);
+    }
+
+    public Holder<Comment> getComments(String deliveryId) {
+        String comments_str = target("deliveries").path(deliveryId).path("comments").request().get(String.class);
+        Type fooType = new TypeToken<Holder<Comment>>() {}.getType();
+        Holder<Comment> holder = new Gson().fromJson(comments_str, fooType);
+        return holder;
     }
 
     /******************************************************************************************************************/
