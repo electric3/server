@@ -24,6 +24,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -39,12 +40,558 @@ public class ClientResourceTest extends JerseyTest {
 
     @Test
     public void testForDirector() {
-        testStatusCalculator();
+        //testStatusCalculator();
         clearDB();
-        ivanScenario();
-        playWithStatusScenario(getClientId());
+        //ivanScenario();
+        //playWithStatusScenario(getClientId());
         //deliveryScenario("56c8e80dc4fa9065ab9376d9", "56c8e340c4fa9063806e0115");
+        electric3Scenario();
     }
+
+    HashMap<String, User> usersMap = new HashMap<String, User>();
+    List<User> usersList = new LinkedList<User>();
+
+    public void electric3Scenario() {
+        replics = toSplit.split(" ");
+        System.out.println(" replics.length " + replics.length);
+        Holder<User> users = getUsers();
+        List<User> items = users.getItems();
+        User targetUser = null;
+
+        for( User user : items ) {
+            if( user.getEmail().equals("ivan@handyassist.com") ) {
+                usersMap.put("ivan", user);
+                usersList.add(user);
+            } else if (  user.getEmail().equals("tanya@handyassist.com") ) {
+                usersMap.put("tanya", user);
+                usersList.add(user);
+            } else if ( user.getEmail().equals("stas@handyassist.com") ) {
+                usersMap.put("stas", user);
+                usersList.add(user);
+            }
+        }
+
+        createClient(usersMap.get("ivan"));
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        final String client_response_str = target("clients").path("info").path((String) usersMap.get("ivan").getUser_id()).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+        assertNotNull(client_response_str);
+        System.out.println("client: " + client_response_str);
+        Client client = Client.deserialize(client_response_str, Client.class);
+        System.out.println("client: " + client_response_str);
+        assertNotNull(client);
+        Mock.ME.setClient(client);
+
+        while (true) {
+            Department dep = new Department();
+            dep.setDescription("Department related to server side development");
+            dep.setOwner(usersMap.get("ivan"));
+            dep.setClientId((String) Mock.ME.getClient().get_id());
+            dep.setProgress(randomProgress());
+            dep.setStatus(randomStatus());
+            dep.setTitle("Server dev");
+
+            electricNewDepartment(dep);
+            List<Department> items1 = getDepartments().getItems();
+
+            Department targetDepartment = null;
+
+            for (Department department : items1) {
+                if (department.getTitle().equals("Server dev")) {
+                    targetDepartment = department;
+                }
+            }
+
+            if (null == targetDepartment) {
+                assertTrue(false);
+            }
+
+            {
+
+                Project p1 = new Project();
+                p1.setTitle("Protocol development");
+                p1.setDescription("Necessary develop protocol");
+                p1.setOwner(usersMap.get("ivan"));
+                p1.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p1);
+
+                List<Project> projectItems = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project targetProject = null;
+
+                for (Project project : projectItems) {
+                    if (project.getTitle().equals("Protocol development")) {
+                        targetProject = project;
+                    }
+                }
+
+                if (null == targetProject) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), targetProject, StatusEnum.RED, usersMap.get("ivan"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Server development");
+                p.setDescription("Necessary develop server");
+                p.setOwner(usersMap.get("ivan"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Server development")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.ORANGE, usersMap.get("ivan"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Tests development");
+                p.setDescription("Necessary develop tests for server");
+                p.setOwner(usersMap.get("ivan"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Tests development")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.GREEN, usersMap.get("ivan"));
+            }
+            break;
+        }
+
+
+        while (true) {
+            Department dep = new Department();
+            dep.setDescription("Department related to web development");
+            dep.setOwner(usersMap.get("stas"));
+            dep.setClientId((String) Mock.ME.getClient().get_id());
+            dep.setProgress(randomProgress());
+            dep.setStatus(randomStatus());
+            dep.setTitle("Web dev");
+
+            electricNewDepartment(dep);
+            List<Department> items1 = getDepartments().getItems();
+
+            Department targetDepartment = null;
+
+            for (Department department : items1) {
+                if (department.getTitle().equals("Web dev")) {
+                    targetDepartment = department;
+                }
+            }
+
+            if (null == targetDepartment) {
+                assertTrue(false);
+            }
+
+            {
+
+                Project p1 = new Project();
+                p1.setTitle("UI stubs");
+                p1.setDescription("Necessary develop UI stubs using material light");
+                p1.setOwner(usersMap.get("stas"));
+                p1.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p1);
+
+                List<Project> projectItems = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project targetProject = null;
+
+                for (Project project : projectItems) {
+                    if (project.getTitle().equals("UI stubs")) {
+                        targetProject = project;
+                    }
+                }
+
+                if (null == targetProject) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), targetProject, StatusEnum.ORANGE, usersMap.get("stas"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Angular switch");
+                p.setDescription("Necessary develop web ui using Angular framework");
+                p.setOwner(usersMap.get("stas"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Angular switch")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.ORANGE, usersMap.get("stas"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Tests development");
+                p.setDescription("Necessary develop tests for angular");
+                p.setOwner(usersMap.get("stas"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Tests development")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.GREEN, usersMap.get("stas"));
+            }
+            break;
+        }
+
+        while (true) {
+            Department dep = new Department();
+            dep.setDescription("Department related to UX & JS DEV");
+            dep.setOwner(usersMap.get("tanya"));
+            dep.setClientId((String) Mock.ME.getClient().get_id());
+            dep.setProgress(randomProgress());
+            dep.setStatus(randomStatus());
+            dep.setTitle("UX & UI JS");
+
+            electricNewDepartment(dep);
+            List<Department> items1 = getDepartments().getItems();
+
+            Department targetDepartment = null;
+
+            for (Department department : items1) {
+                if (department.getTitle().equals("UX & UI JS")) {
+                    targetDepartment = department;
+                }
+            }
+
+            if (null == targetDepartment) {
+                assertTrue(false);
+            }
+
+            {
+
+                Project p1 = new Project();
+                p1.setTitle("Prototype dev");
+                p1.setDescription("Necessary develop prototype");
+                p1.setOwner(usersMap.get("tanya"));
+                p1.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p1);
+
+                List<Project> projectItems = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project targetProject = null;
+
+                for (Project project : projectItems) {
+                    if (project.getTitle().equals("Prototype dev")) {
+                        targetProject = project;
+                    }
+                }
+
+                if (null == targetProject) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), targetProject, StatusEnum.GREEN, usersMap.get("tanya"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Sketches dev");
+                p.setDescription("Necessary develop sketches");
+                p.setOwner(usersMap.get("tanya"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Sketches dev")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.GREEN, usersMap.get("tanya"));
+            }
+
+            {
+                Project p = new Project();
+                p.setTitle("Tests development");
+                p.setDescription("Necessary develop tests for UI & UX");
+                p.setOwner(usersMap.get("tanya"));
+                p.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+
+                electricNewProject1(getClientId(), (String) targetDepartment.get_id(), p);
+
+                List<Project> pi = getProjects((String) targetDepartment.get_id()).getItems();
+
+                Project tp = null;
+
+                for (Project project : pi) {
+                    if (project.getTitle().equals("Tests development")) {
+                        tp = project;
+                    }
+                }
+
+                if (null == tp) {
+                    assertTrue(false);
+                }
+                electricCreateDeliveriesForProject(getClientId(), (String) targetDepartment.get_id(), tp, StatusEnum.GREEN, usersMap.get("tanya"));
+            }
+            break;
+        }
+
+//        {
+//            Department dep = new Department();
+//            dep.setDescription("Department related to angular development");
+//            dep.setOwner(usersMap.get("tanya"));
+//            dep.setClientId((String) Mock.ME.getClient().get_id());
+//            dep.setProgress(randomProgress());
+//            dep.setStatus(randomStatus());
+//            dep.setTitle("Product dev");
+//
+//            electricNewDepartment(dep);
+//        }
+//
+//        {
+//            Department dep = new Department();
+//            dep.setDescription("Department related to angular development");
+//            dep.setOwner(usersMap.get("stas"));
+//            dep.setClientId((String) Mock.ME.getClient().get_id());
+//            dep.setProgress(randomProgress());
+//            dep.setStatus(randomStatus());
+//            dep.setTitle("Agular dev");
+//
+//            electricNewDepartment(dep);
+//        }
+    }
+
+    public void electricCreateDeliveriesForProject(String clientId, String id, Project targetProject, StatusEnum col, User assignee) {
+        if( col.equals(StatusEnum.RED) ) {
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 1 ");
+                delivery.setDescription("Description 1 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.RED);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 2 ");
+                delivery.setDescription("Description 2 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.ORANGE);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+
+                List<Delivery> items = getDeliveries((String) targetProject.get_id()).getItems();
+            }
+
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 3 ");
+                delivery.setDescription("Description 3 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+
+                List<Delivery> items = getDeliveries((String) targetProject.get_id()).getItems();
+            }
+        } else if ( col.equals(StatusEnum.ORANGE ) ) {
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 1 ");
+                delivery.setDescription("Description 1 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 2 ");
+                delivery.setDescription("Description 2 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.ORANGE);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 3 ");
+                delivery.setDescription("Description 3 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+        } else {
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 1 ");
+                delivery.setDescription("Description 1 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 2 ");
+                delivery.setDescription("Description 2 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+
+            {
+                Delivery delivery = new Delivery();
+                delivery.setAssignee(assignee);
+                delivery.setTitle("Delivery 3 ");
+                delivery.setDescription("Description 3 " + getTSS());
+                delivery.setProgress(randomProgress());
+                delivery.setDeadline(String.valueOf(System.currentTimeMillis() + 60 * 60 * 12));
+                delivery.setStatus(StatusEnum.GREEN);
+                Response response = target("projects").path((String) targetProject.get_id()).path("deliveries")
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .post(Entity.entity(delivery.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+            }
+        }
+
+        List<Delivery> items = getDeliveries((String) targetProject.get_id()).getItems();
+        for( Delivery d : items ) {
+            electricChatForDelivery((String)d.get_id());
+        }
+    }
+
+    public void electricNewProject1(String clientId, String departmentId, Project p1) {
+        Response response = target("departments").path(departmentId).path("projects")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(p1.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+        assertNotNull(response);
+    }
+
+    public void electricNewDepartment(Department newDep) {
+        Response newDepartmentResponse = target("clients")
+                .path((String) Mock.ME.getClient().get_id()).path("/departments")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(newDep.serialize(), MediaType.APPLICATION_JSON_TYPE), Response.class);
+    }
+
+    public void electricChatForDelivery( String deliveryId ) {
+        for( int i = 0; i < 5; i++) {
+            String randomReplic = replics[ThreadLocalRandom.current().nextInt(0, replics.length)];
+            User usr = usersList.get(ThreadLocalRandom.current().nextInt(0, usersList.size() ));
+            deliveryAddComment(randomReplic, deliveryId, usr);
+        }
+    }
+
+
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
 
     public void testStatusCalculator( ) {
         assertTrue(StatusCalculator.ME.selectWorse(StatusEnum.GREEN, StatusEnum.ORANGE).equals(StatusEnum.ORANGE));
@@ -627,4 +1174,8 @@ public class ClientResourceTest extends JerseyTest {
     public void playWithProgress(String clientId) {
 
     }
+
+    public String[] replics;
+
+    String toSplit = "Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit, quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.";
 }

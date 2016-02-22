@@ -81,6 +81,7 @@ public class ProjectsDBManager extends NoSqlBase {
                 delivery.getTitle(), project.getTitle()));
         ActionsDBManager actionsDBManager = ActionsDBManager.getInstance();
         actionsDBManager.createAction(action);
+        recalculateStatus(projectId, delivery.getStatus());
     }
 
     public void setOwner(String projectId, User user) {
